@@ -30,9 +30,29 @@ python scripts/video_project.py doctor --project-root C:\path\to\my-video-projec
 
 The report distinguishes planning, FFmpeg editing, local ASR, GPU acceleration, Remotion scaffolding, an installed Remotion runtime, browser capture, and disk capacity. It emits a degraded but honest fallback plan when components are absent.
 
+## What to copy
+
+Copy or clone the **entire repository folder**, not only `SKILL.md`. The entry file links to the bundled workflow references, templates, and project-control script.
+
+| Path | Role |
+| --- | --- |
+| `SKILL.md` | Required portable Agent Skill entry point. |
+| `references/` | Editing, caption, B-roll, Remotion, audio, and delivery guidance loaded on demand. |
+| `scripts/` | Optional but recommended guided project interface and environment checks. |
+| `agents/openai.yaml` | Optional OpenAI/Codex UI metadata. Other compatible agents can safely ignore it. |
+
+Any agent that implements the open Agent Skills folder convention can load `SKILL.md` directly. `agents/openai.yaml` is not a runtime dependency.
+
 ## Install in Codex
 
-Copy the entire `video-production-studio` folder into the target agent's skills directory, then invoke it as `$video-production-studio`. Agents that implement the open Agent Skills folder convention can read `SKILL.md` directly; `agents/openai.yaml` is optional UI metadata.
+Place the repository at `video-production-studio` inside the target Codex skills directory, then invoke it as `$video-production-studio` or describe a complex video-production task that matches its description.
+
+Personal installation on Windows:
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.codex\skills" | Out-Null
+git clone https://github.com/Zxzv-arch/video-production-studio-skill.git "$env:USERPROFILE\.codex\skills\video-production-studio"
+```
 
 ## Install in OpenCode
 
@@ -48,6 +68,36 @@ Project-local installation on Windows:
 ```powershell
 git clone https://github.com/Zxzv-arch/video-production-studio-skill.git .opencode/skills/video-production-studio
 ```
+
+## Install in Claude Code
+
+Claude Code supports the same folder-based Agent Skills format and discovers skills from either location:
+
+- project: `.claude/skills/video-production-studio/`
+- personal: `~/.claude/skills/video-production-studio/`
+
+Project-local installation on Windows:
+
+```powershell
+New-Item -ItemType Directory -Force -Path .claude\skills | Out-Null
+git clone https://github.com/Zxzv-arch/video-production-studio-skill.git .claude\skills\video-production-studio
+```
+
+Personal installation on Windows:
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills" | Out-Null
+git clone https://github.com/Zxzv-arch/video-production-studio-skill.git "$env:USERPROFILE\.claude\skills\video-production-studio"
+```
+
+Personal installation on macOS or Linux:
+
+```bash
+mkdir -p ~/.claude/skills
+git clone https://github.com/Zxzv-arch/video-production-studio-skill.git ~/.claude/skills/video-production-studio
+```
+
+Claude can select the skill automatically from its description, or you can invoke it explicitly with `/video-production-studio`. If `.claude/skills` did not exist when the current Claude Code session started, restart that session once so the new top-level directory is watched. `agents/openai.yaml` is not required by Claude Code.
 
 ## Agent entry point
 
