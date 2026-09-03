@@ -13,3 +13,5 @@ Repository description: A portable Agent Skill with Python workflow guidance for
 - `agents/openai.yaml` supplies optional Codex/OpenAI interface metadata.
 
 Runtime media lives in a separate guided project directory. Its `project.json` records state while large media and generated artifacts remain outside this skill repository.
+
+The skill has no Agent Skill dependency. Its references contain the required editorial and Remotion decision rules; external executables are detected separately by the guided interface.

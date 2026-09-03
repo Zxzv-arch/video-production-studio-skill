@@ -9,3 +9,5 @@ Start with `SKILL.md`. For a complex video, read `references/guided-workflow.md`
 Preserve originals and existing edits. Do not upload private footage, create accounts, spend credits, or publish media without explicit authorization. Register artifacts and decisions before handing work to another agent.
 
 The repository contains instructions and utilities, not user footage, transcripts, credentials, or generated client media.
+
+This is a self-contained Agent Skill. Do not request another editing or Remotion guidance skill. Check actual executable availability with `python scripts/video_project.py doctor` and report only software that the chosen deliverable requires.

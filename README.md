@@ -2,6 +2,8 @@
 
 Portable Agent Skill for complex, local-first video production. It combines transcript editing, editable timelines, content-driven Remotion motion, semantic B-roll, finishing, and verified multi-platform delivery.
 
+It is self-contained at the Agent Skill level: no additional video-editing or Remotion guidance skill is required. Runtime programs such as FFmpeg, Python transcription packages, Node.js, and Remotion are only needed when the selected production path uses them.
+
 Repository: `Zxzv-arch/video-production-studio-skill` (Private)
 
 ## Guided interface
@@ -19,6 +21,12 @@ python scripts/video_project.py status --project-root C:\path\to\my-video-projec
 ```
 
 The interface creates a portable `project.json`, production folders, stage gates, artifact history, blockers, and concrete next actions. It does not copy or upload the source footage.
+
+Check executable capabilities without triggering dependency reminders:
+
+```powershell
+python scripts/video_project.py doctor
+```
 
 ## Install in Codex
 

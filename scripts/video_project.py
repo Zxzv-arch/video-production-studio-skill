@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import importlib.util
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -145,6 +147,12 @@ def command_init(args: argparse.Namespace) -> None:
         "project": {"name": name, "kind": kind, "root": str(root)},
         "createdAt": created,
         "updatedAt": created,
+        "agentContract": {
+            "selfContained": True,
+            "requiredAgentSkills": [],
+            "entrypoint": "video-production-studio/SKILL.md",
+            "stateSource": "project.json",
+        },
         "sources": sources,
         "brief": {
             "audience": audience,
@@ -220,6 +228,35 @@ def command_status(args: argparse.Namespace) -> None:
     print_summary(load(Path(args.project_root).expanduser().resolve()))
 
 
+def command_doctor(args: argparse.Namespace) -> None:
+    executables = {name: shutil.which(name) for name in ["ffmpeg", "ffprobe", "node", "npm", "npx"]}
+    report = {
+        "selfContainedAgentSkill": True,
+        "requiredAgentSkills": [],
+        "python": sys.executable,
+        "executables": executables,
+        "pythonModules": {"faster_whisper": importlib.util.find_spec("faster_whisper") is not None},
+        "features": {
+            "guidedProject": True,
+            "ffmpegEditing": bool(executables["ffmpeg"] and executables["ffprobe"]),
+            "localTranscription": bool(executables["ffmpeg"] and importlib.util.find_spec("faster_whisper")),
+            "remotionRendering": bool(executables["node"] and executables["npm"] and executables["npx"]),
+        },
+    }
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return
+    print("Video Production Studio environment")
+    print("Agent skill dependencies: none")
+    print(f"Python: {sys.executable}")
+    for name, path in executables.items():
+        print(f"{name}: {path or 'not found'}")
+    print(f"faster_whisper: {'available' if report['pythonModules']['faster_whisper'] else 'not found'}")
+    print("Features:")
+    for name, available in report["features"].items():
+        print(f"  - {name}: {'ready' if available else 'unavailable'}")
+
+
 def command_advance(args: argparse.Namespace) -> None:
     root = Path(args.project_root).expanduser().resolve()
     data = load(root)
@@ -293,6 +330,10 @@ def command_unblock(args: argparse.Namespace) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Guided, resumable video-production project interface")
     commands = parser.add_subparsers(dest="command", required=True)
+
+    doctor = commands.add_parser("doctor", help="Report executable capabilities; no other agent skill is required")
+    doctor.add_argument("--json", action="store_true")
+    doctor.set_defaults(func=command_doctor)
 
     init = commands.add_parser("init", help="Create folders and a portable project.json")
     init.add_argument("--project-root", required=True)

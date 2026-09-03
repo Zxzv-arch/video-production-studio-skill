@@ -1,11 +1,20 @@
 ---
 name: video-production-studio
-description: Plan, edit, animate, caption, mix, and deliver complex videos from local footage, including transcript-driven long-form cuts, multi-track timelines, content-driven Remotion explainers, semantic B-roll, and multi-platform variants. Use for substantial video creation or revision; do not use for simple playback, metadata lookup, or a one-off codec conversion with no editorial decisions.
+description: Self-contained planning, editing, animation, captioning, mixing, and delivery for complex local video projects, including transcript-driven long-form cuts, multi-track timelines, content-driven Remotion explainers, semantic B-roll, and multi-platform variants. Use for substantial video creation or revision; do not use for simple playback, metadata lookup, or a one-off codec conversion with no editorial decisions.
+metadata:
+  self-contained: "true"
+  required-agent-skills: "none"
 ---
 
 # Video Production Studio
 
 Turn source media into a verified, editable video package. Treat spoken meaning and narrative purpose as the timing source; effects are not decoration.
+
+## Self-contained capability contract
+
+This folder contains the editorial and Remotion guidance required for the workflow. Do not tell the user to install, load, or invoke another video-editing or Remotion guidance skill. Do not pause merely because another agent skill is unavailable. Read the routed references in this folder and continue.
+
+Execution software is different from an agent skill: FFmpeg is needed for many media operations, Python packages may be needed for local transcription, and Node.js plus Remotion are needed to render a Remotion composition. Detect these with `python scripts/video_project.py doctor`; use an available equivalent or report the exact missing executable only when the current deliverable truly depends on it.
 
 ## Start or resume a guided project
 
@@ -33,6 +42,7 @@ For any request that combines two or more production disciplines, spans multiple
 Choose only the references needed for the current job:
 
 - Long interviews, podcasts, filler removal, silence tightening, speaker-based edits: read [references/transcript-editing.md](references/transcript-editing.md).
+- Cut selection, pacing, transitions, color, sound, captions, speed changes, and compositing: read [references/editorial-craft.md](references/editorial-craft.md).
 - Content-driven explainers, kinetic typography, diagrams, UI demonstrations, or Remotion: read [references/remotion-and-motion.md](references/remotion-and-motion.md).
 - B-roll planning, generated visuals, highlight extraction, or multiple short versions: read [references/broll-and-variants.md](references/broll-and-variants.md).
 - A user-editable multi-track timeline or interchange with an NLE: read [references/timeline-projects.md](references/timeline-projects.md).

@@ -2,6 +2,8 @@
 
 Use when the edit needs diagrams, UI demonstrations, kinetic typography, branded explainers, data-driven scenes, or reusable video templates.
 
+This reference is self-contained for ordinary Remotion video production. Do not request a separate Remotion guidance skill. If an API is absent from the installed version or a current upgrade is explicitly requested, consult the installed package types or official Remotion documentation.
+
 ## Map meaning to motion
 
 For each transcript beat, record the claim, viewer takeaway, visual metaphor or evidence, hero element, timing, and whether the speaker remains visible.
@@ -24,9 +26,33 @@ Examples:
 - Premount media-bearing sequences when the framework supports it.
 - Reference local assets through the project asset mechanism instead of absolute development-machine paths.
 
+For a new blank project, use `npx create-video@latest --yes --blank --no-tailwind <project-name>` and install dependencies. Add version-matched Remotion packages with `npx remotion add <package>` rather than manually mixing versions.
+
+Put media in `public/` and resolve it with `staticFile()`. Import `<Video>` and `<Audio>` from `@remotion/media`. Use `<CanvasImage>` for still images when appropriate. Use `from`, `durationInFrames`, `trimBefore`, and `trimAfter` in frames; wrap components in `<Sequence>` when they do not expose the required timing props.
+
+## Deterministic animation
+
+- Drive animation from `useCurrentFrame()` and `useVideoConfig()` with `interpolate()`, `Easing.bezier()`, or `Easing.spring()`.
+- Never use CSS transitions, CSS keyframes, Tailwind animation utilities, wall-clock timers, or unseeded runtime randomness for rendered motion.
+- Clamp interpolation outside its intended range unless deliberate extrapolation is required.
+- Prefer individual `scale`, `translate`, and `rotate` style properties. Keep editable interpolation calls and keyframes inline in the style prop when Studio editing matters.
+- Use perceptual scale output when supported so linear numeric scaling appears visually even.
+
+For a 1920×1080 composition, keep important text roughly 80 px from the sides and 100 px from the top and bottom. A main headline generally needs about 84 px or more and supporting text about 44 px or more; scale these guides with the output size and actual viewing distance.
+
+## Editable timelines and scenes
+
+Put each substantial scene in a separate component and source file. For independently positioned clips, author each `<Video>` as its own JSX node with explicit `from`, `durationInFrames`, and `trimBefore`. For ripple editing, use explicitly authored `<TransitionSeries.Sequence>` nodes so changing one duration shifts later clips.
+
+Do not generate Studio-editable clips or scenes with `.map()`. Keep timings as literal frame values where editability matters, add useful names, and optionally register individual scenes as compositions so an editor can open them directly.
+
+Use `TransitionSeries.Transition` for overlap transitions and `TransitionSeries.Overlay` for an effect placed over a cut. A transition shortens total duration by its overlap; an overlay does not. Calculate and register the master duration accordingly. Do not place two overlays together or directly beside a transition.
+
 ## Motion hierarchy
 
 Each scene should have primary semantic motion, secondary connectors or reactions, and restrained ambient motion. Use decelerating entrances, accelerating exits, and springs only when the subject benefits from physical character. Limit simultaneous animation so the hero remains obvious.
+
+Typical timing ranges are 100–250 ms for light feedback, 200–400 ms for cards and interface state changes, 400–700 ms for premium scene motion, and 600–1200 ms for a deliberate reveal. These are starting points. The spoken beat and emotional weight decide the final timing.
 
 ## Talking-head integration
 
@@ -34,6 +60,29 @@ Each scene should have primary semantic motion, secondary connectors or reaction
 - Shift, dim, crop, or place the speaker in picture-in-picture while diagrams carry technical explanations.
 - Reintroduce the face after dense graphics to reset attention.
 - Place captions in a protected layer above all graphics and verify the longest line.
+
+## Caption implementation
+
+Keep rendering captions in JSON records compatible with this shape:
+
+```ts
+type Caption = {
+  text: string;
+  startMs: number;
+  endMs: number;
+  timestampMs: number | null;
+  confidence: number | null;
+  pageBreakAfter?: boolean;
+};
+```
+
+Use `@remotion/captions` to parse SRT or group word captions into readable pages. Load caption JSON or SRT with `staticFile()` and hold rendering with `useDelayRender()` until parsing completes. Convert page milliseconds to frames with the composition FPS, render each page in a `<Sequence>`, preserve intentional whitespace, and compute the active word from absolute caption time. Keep caption rendering in its own component above the visual content.
+
+## Audio and embedded video
+
+Layer audio with explicit `<Audio>` nodes. Delay with `<Sequence>`, trim in frames, and use a frame-relative `volume` callback for fades or ducking. Use `playbackRate` only within the media component's supported range. Pitch processing may differ between Studio preview and server render, so verify the rendered output when pitch is changed.
+
+For embedded footage, set sizing and `objectFit` deliberately. Use proxies when the browser cannot decode the camera codec reliably; keep source in/out decisions in the edit manifest so the final can return to original-quality media.
 
 ## Rendering workflow
 
@@ -43,4 +92,4 @@ Each scene should have primary semantic motion, secondary connectors or reaction
 4. Correct warnings before the master render.
 5. Render the master once, then derive delivery variants without unnecessary repeated compositing.
 
-If an official Remotion skill is available, follow its current API guidance for project scaffolding, media components, captions, and rendering.
+Use `npx remotion studio --no-open` for interactive preview, `npx remotion still <composition-id> --frame <n>` for representative frame checks, and `npx remotion render <composition-id> <output>` for requested output. Rendering authorization follows the user's requested deliverable; opening Studio alone is not proof that the composition renders.
