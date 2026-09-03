@@ -1,6 +1,7 @@
 ---
 name: video-production-studio
 description: Self-contained planning, editing, animation, captioning, mixing, and delivery for complex local video projects, including transcript-driven long-form cuts, multi-track timelines, content-driven Remotion explainers, semantic B-roll, and multi-platform variants. Use for substantial video creation or revision; do not use for simple playback, metadata lookup, or a one-off codec conversion with no editorial decisions.
+license: Apache-2.0
 metadata:
   self-contained: "true"
   required-agent-skills: "none"

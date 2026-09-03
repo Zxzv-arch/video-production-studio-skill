@@ -4,6 +4,8 @@ This repository is a skill package; it has no server deployment.
 
 Project: Video Production Studio Skill. Repository: `Zxzv-arch/video-production-studio-skill`.
 
+The public repository is distributed under Apache-2.0. Clones and redistributed packages must retain the license and applicable notice information.
+
 For Codex, copy the repository directory to the local Codex skills folder and keep the directory name `video-production-studio`.
 
 For OpenCode, copy or clone it to `.opencode/skills/video-production-studio/` in a project, or `~/.config/opencode/skills/video-production-studio/` for global discovery. Preserve the complete directory so references and scripts remain available.

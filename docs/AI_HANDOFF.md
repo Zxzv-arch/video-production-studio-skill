@@ -10,4 +10,6 @@ Preserve originals and existing edits. Do not upload private footage, create acc
 
 The repository contains instructions and utilities, not user footage, transcripts, credentials, or generated client media.
 
+License: Apache-2.0. Preserve the repository's `LICENSE` and applicable `NOTICE` information when redistributing it.
+
 This is a self-contained Agent Skill. Do not request another editing or Remotion guidance skill. Check actual executable availability with `python scripts/video_project.py doctor --project-root <dir> --write --json`; use the recorded fallback plan and report only software that the chosen deliverable requires.

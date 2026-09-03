@@ -4,7 +4,7 @@ Portable Agent Skill for complex, local-first video production. It combines tran
 
 It is self-contained at the Agent Skill level: no additional video-editing or Remotion guidance skill is required. Runtime programs such as FFmpeg, Python transcription packages, Node.js, and Remotion are only needed when the selected production path uses them.
 
-Repository: `Zxzv-arch/video-production-studio-skill` (Private)
+Repository: `Zxzv-arch/video-production-studio-skill` (Public)
 
 ## Guided interface
 
@@ -60,3 +60,9 @@ Core instructions have no service dependency. Optional execution features requir
 - Node.js and Remotion for programmatic motion graphics.
 
 Cloud editors, generative video providers, logins, uploads, and paid credits are optional and require explicit user authorization.
+
+## License
+
+Licensed under the Apache License 2.0. This permits commercial and private use, modification, and redistribution subject to the license terms, and includes an explicit patent grant. Keep the `LICENSE` and applicable `NOTICE` information with redistributed copies.
+
+This repository vendors no third-party Skill or media assets. Design-research sources and their licenses are recorded in `docs/RESEARCH_SOURCES.md`.
