@@ -4,9 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
-import importlib.util
+import platform
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -228,33 +229,132 @@ def command_status(args: argparse.Namespace) -> None:
     print_summary(load(Path(args.project_root).expanduser().resolve()))
 
 
+def resolve_executable(name: str, root: Path) -> str | None:
+    env_key = f"VIDEO_{name.upper().replace('-', '_')}_BIN"
+    configured = os.environ.get(env_key)
+    if configured:
+        candidate = Path(configured).expanduser()
+        if candidate.is_file():
+            return str(candidate.resolve())
+    found = shutil.which(name)
+    if found:
+        return found
+    suffixes = [".exe", ".cmd", ""] if os.name == "nt" else [""]
+    bases = [root / ".video-tools", root / "tools" / name, root / "vendor" / name / "bin"]
+    for base in bases:
+        for suffix in suffixes:
+            candidate = base / f"{name}{suffix}"
+            if candidate.is_file():
+                return str(candidate.resolve())
+    return None
+
+
+def module_available(name: str) -> bool:
+    return importlib.util.find_spec(name) is not None
+
+
 def command_doctor(args: argparse.Namespace) -> None:
-    executables = {name: shutil.which(name) for name in ["ffmpeg", "ffprobe", "node", "npm", "npx"]}
+    root = Path(args.project_root).expanduser().resolve() if args.project_root else Path.cwd().resolve()
+    executable_names = [
+        "ffmpeg",
+        "ffprobe",
+        "node",
+        "npm",
+        "npx",
+        "git",
+        "nvidia-smi",
+        "rocm-smi",
+        "google-chrome",
+        "chromium",
+        "msedge",
+    ]
+    executables = {name: resolve_executable(name, root) for name in executable_names}
+    local_remotion_candidates = [
+        root / "node_modules" / ".bin" / "remotion.cmd",
+        root / "node_modules" / ".bin" / "remotion",
+        root / "node_modules" / "remotion" / "package.json",
+    ]
+    local_remotion = next((str(path.resolve()) for path in local_remotion_candidates if path.exists()), None)
+    modules = {name: module_available(name) for name in ["faster_whisper", "whisper", "whisperx", "PIL"]}
+    has_ffmpeg = bool(executables["ffmpeg"] and executables["ffprobe"])
+    has_node = bool(executables["node"] and executables["npm"] and executables["npx"])
+    has_asr = any(modules[name] for name in ["faster_whisper", "whisper", "whisperx"])
+    has_gpu = bool(executables["nvidia-smi"] or executables["rocm-smi"])
+    disk = shutil.disk_usage(root if root.exists() else root.parent)
+    disk_free_gib = round(disk.free / (1024**3), 2)
+    fallbacks: list[str] = []
+    if not has_ffmpeg:
+        if has_node and local_remotion:
+            fallbacks.append("Probe the installed Remotion CLI for bundled ffmpeg/ffprobe commands; otherwise keep planning and timeline artifacts until a media backend is available.")
+        else:
+            fallbacks.append("Continue with brief, transcript supplied by the user, storyboard, shot plan, and EDL; encoded delivery and full-decode QA remain unavailable.")
+    if not has_asr:
+        fallbacks.append("Use supplied SRT/VTT/transcript or request timed text; never invent word timestamps.")
+    if not has_node or not local_remotion:
+        if has_ffmpeg:
+            fallbacks.append("Use FFmpeg for cuts, captions, simple overlays, audio, and exports; preserve a Remotion-ready visual manifest for later enhancement.")
+        else:
+            fallbacks.append("Produce the Remotion source plan and asset manifest without claiming a preview or render.")
+    if not has_gpu:
+        fallbacks.append("Use CPU-safe ASR, smaller models, proxies, lower preview scale, low render concurrency, or chunked rendering.")
+    if not any(executables[name] for name in ["google-chrome", "chromium", "msedge"]):
+        fallbacks.append("Use supplied screenshots/recordings or extracted source frames instead of live browser capture.")
+    if disk_free_gib < 10:
+        fallbacks.append("Free space is limited: proxy first, reuse caches, estimate peak render storage, and render in validated chunks.")
     report = {
         "selfContainedAgentSkill": True,
         "requiredAgentSkills": [],
+        "projectRoot": str(root),
+        "platform": {"system": platform.system(), "release": platform.release(), "machine": platform.machine()},
         "python": sys.executable,
         "executables": executables,
-        "pythonModules": {"faster_whisper": importlib.util.find_spec("faster_whisper") is not None},
+        "pythonModules": modules,
+        "localRemotion": local_remotion,
+        "diskFreeGiB": disk_free_gib,
         "features": {
             "guidedProject": True,
-            "ffmpegEditing": bool(executables["ffmpeg"] and executables["ffprobe"]),
-            "localTranscription": bool(executables["ffmpeg"] and importlib.util.find_spec("faster_whisper")),
-            "remotionRendering": bool(executables["node"] and executables["npm"] and executables["npx"]),
+            "timelineAndShotPlanning": True,
+            "ffmpegEditing": has_ffmpeg,
+            "localTranscription": bool(has_ffmpeg and has_asr),
+            "gpuAcceleration": has_gpu,
+            "remotionScaffoldPossible": has_node,
+            "remotionRuntimePresent": bool(has_node and local_remotion),
         },
+        "fallbacks": fallbacks,
     }
+    if args.write:
+        if not args.project_root:
+            raise SystemExit("--write requires --project-root pointing to an initialized guided project.")
+        data = load(root)
+        data["environmentProfile"] = report
+        data["workflow"]["history"].append({
+            "at": now(),
+            "event": "environment-probed",
+            "readyFeatures": [name for name, ready in report["features"].items() if ready],
+            "fallbackCount": len(fallbacks),
+        })
+        save(root, data)
+        report["writtenTo"] = str(manifest_path(root))
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return
     print("Video Production Studio environment")
     print("Agent skill dependencies: none")
+    print(f"Project root: {root}")
     print(f"Python: {sys.executable}")
     for name, path in executables.items():
         print(f"{name}: {path or 'not found'}")
-    print(f"faster_whisper: {'available' if report['pythonModules']['faster_whisper'] else 'not found'}")
+    for name, available in modules.items():
+        print(f"{name}: {'available' if available else 'not found'}")
+    print(f"local Remotion: {local_remotion or 'not found'}")
+    print(f"free disk: {disk_free_gib} GiB")
     print("Features:")
     for name, available in report["features"].items():
         print(f"  - {name}: {'ready' if available else 'unavailable'}")
+    if fallbacks:
+        print("Fallback plan:")
+        for item in fallbacks:
+            print(f"  - {item}")
 
 
 def command_advance(args: argparse.Namespace) -> None:
@@ -332,6 +432,8 @@ def build_parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", required=True)
 
     doctor = commands.add_parser("doctor", help="Report executable capabilities; no other agent skill is required")
+    doctor.add_argument("--project-root", help="Inspect local tools and packages relative to this project")
+    doctor.add_argument("--write", action="store_true", help="Persist the environment profile in an initialized project.json")
     doctor.add_argument("--json", action="store_true")
     doctor.set_defaults(func=command_doctor)
 

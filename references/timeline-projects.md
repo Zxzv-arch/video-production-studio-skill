@@ -24,6 +24,10 @@ Keep stable clip IDs and source timecodes. Never bake captions or graphics into 
 
 Prefer the target editor's native project when it is reliable. Otherwise use supported interchange such as XML, EDL, or OTIO, and include the source directory layout. Test a small round-trip before generating a large project because effects, speed ramps, nested sequences, and caption styling often do not translate perfectly.
 
+Treat a native-editor integration as an optional adapter, not a prerequisite. Before writing a draft, detect the editor version, draft schema, target path, and adapter/library availability; inspect an existing harmless draft when possible. Clone templates before replacing assets and never overwrite an original draft. If the adapter is missing or unverified on the current platform, deliver the portable manifest, stable clip IDs, track map, captions, and a small interchange file instead of claiming a native project works.
+
+For CapCut/Jianying-style drafts, keep captions, text, audio, effects, and video on separate editable tracks. Record any native asset identifiers separately from semantic intent so another editor or backend can substitute them. Headless export is an independent capability: verify it explicitly rather than assuming that draft generation implies export automation.
+
 ## Division of labor
 
 Automation should handle transcription, selects, silence candidates, proxy creation, first assembly, caption timing, relinking metadata, and repeatable exports. The visual editor should handle subjective trims, performance choices, music feel, and finishing decisions that benefit from direct playback.

@@ -54,6 +54,10 @@ Each scene should have primary semantic motion, secondary connectors or reaction
 
 Typical timing ranges are 100–250 ms for light feedback, 200–400 ms for cards and interface state changes, 400–700 ms for premium scene motion, and 600–1200 ms for a deliberate reveal. These are starting points. The spoken beat and emotional weight decide the final timing.
 
+Define a project motion identity with one dominant personality, one signature easing family, and a small duration palette. Adapt density to the subject: financial, healthcare, and enterprise explanations generally need restrained motion; entertainment and gaming can carry greater amplitude and faster timing.
+
+Provide a lower-motion treatment when large zooms, rapid direction changes, full-frame spins, multi-layer parallax, or persistent loops could cause discomfort. Replace spatial travel with shorter fades, remove spring bounce, reduce simultaneous motion, and never communicate essential meaning through movement alone. For render performance, favor opacity and transforms, stagger expensive layers, and keep filters, animated shadows, and large blur regions limited.
+
 ## Talking-head integration
 
 - Keep the face prominent during introductions, opinions, and trust-building statements.

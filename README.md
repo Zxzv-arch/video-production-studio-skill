@@ -25,8 +25,10 @@ The interface creates a portable `project.json`, production folders, stage gates
 Check executable capabilities without triggering dependency reminders:
 
 ```powershell
-python scripts/video_project.py doctor
+python scripts/video_project.py doctor --project-root C:\path\to\my-video-project --write
 ```
+
+The report distinguishes planning, FFmpeg editing, local ASR, GPU acceleration, Remotion scaffolding, an installed Remotion runtime, browser capture, and disk capacity. It emits a degraded but honest fallback plan when components are absent.
 
 ## Install in Codex
 

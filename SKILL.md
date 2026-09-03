@@ -16,6 +16,8 @@ This folder contains the editorial and Remotion guidance required for the workfl
 
 Execution software is different from an agent skill: FFmpeg is needed for many media operations, Python packages may be needed for local transcription, and Node.js plus Remotion are needed to render a Remotion composition. Detect these with `python scripts/video_project.py doctor`; use an available equivalent or report the exact missing executable only when the current deliverable truly depends on it.
 
+Run `doctor --project-root <dir> --write --json` before choosing an engine. Read [references/environment-fallbacks.md](references/environment-fallbacks.md) when a required executable, package, GPU, GUI editor, browser, or network connection is absent. Continue with a lower-capability route when it still satisfies the deliverable; never pretend an unavailable component ran.
+
 ## Start or resume a guided project
 
 For any request that combines two or more production disciplines, spans multiple sessions, or may be handed to another AI, read [references/guided-workflow.md](references/guided-workflow.md) first.
@@ -44,8 +46,11 @@ Choose only the references needed for the current job:
 - Long interviews, podcasts, filler removal, silence tightening, speaker-based edits: read [references/transcript-editing.md](references/transcript-editing.md).
 - Cut selection, pacing, transitions, color, sound, captions, speed changes, and compositing: read [references/editorial-craft.md](references/editorial-craft.md).
 - Content-driven explainers, kinetic typography, diagrams, UI demonstrations, or Remotion: read [references/remotion-and-motion.md](references/remotion-and-motion.md).
+- Product demos, cinematic shot planning, camera language, styleframes, or screen-capture storytelling: read [references/shot-direction.md](references/shot-direction.md).
 - B-roll planning, generated visuals, highlight extraction, or multiple short versions: read [references/broll-and-variants.md](references/broll-and-variants.md).
+- Long-form-to-short-form selection, vertical reframing, candidate scoring, or batch social clips: read [references/shortform-selection.md](references/shortform-selection.md).
 - A user-editable multi-track timeline or interchange with an NLE: read [references/timeline-projects.md](references/timeline-projects.md).
+- Missing or uncertain software, GPU, fonts, browser, NLE, ASR, network, or disk capacity: read [references/environment-fallbacks.md](references/environment-fallbacks.md).
 - Complex projects combining several modes: read [references/complex-workflows.md](references/complex-workflows.md) and maintain the manifest described in [references/project-manifest.md](references/project-manifest.md).
 - Cross-agent handoff, first-time setup, resumable work, or step-by-step guidance: read [references/guided-workflow.md](references/guided-workflow.md).
 - Color, sound, subtitles, codecs, delivery, and quality control: read [references/finishing-and-qa.md](references/finishing-and-qa.md).
