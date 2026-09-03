@@ -1,0 +1,7 @@
+interface:
+  display_name: "Video Production Studio"
+  short_description: "Complex local-first video editing and motion workflows"
+  brand_color: "#6D5DFB"
+  default_prompt: "Use $video-production-studio to initialize a guided video project and carry it through verified delivery."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,12 @@
+{
+  "projectRoot": "C:/video-projects/example",
+  "sources": ["C:/footage/interview.mp4"],
+  "kind": "interview",
+  "audience": "new customers",
+  "targetDurationSec": 600,
+  "aspectRatios": ["16:9", "9:16"],
+  "captionLanguage": "zh",
+  "timelinePreference": "both",
+  "visualStyle": "content-driven kinetic typography and restrained cinematic motion",
+  "offlineOnly": true
+}
