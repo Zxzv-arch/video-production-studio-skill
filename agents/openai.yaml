@@ -1,7 +1,7 @@
 interface:
   display_name: "Video Production Studio"
-  short_description: "Standalone complex video editing and motion workflows"
+  short_description: "Professional talking-head demos, motion, editing, and delivery"
   brand_color: "#6D5DFB"
-  default_prompt: "Use $video-production-studio to initialize a guided video project, iterate in draft mode, and promote through review to a verified master only when ready."
+  default_prompt: "Use $video-production-studio to create a professional talking-head explainer with a visible presenter, concrete demonstrations, animated PiP scene choreography, captions, and verified delivery; iterate in draft before review and master."
 policy:
   allow_implicit_invocation: true

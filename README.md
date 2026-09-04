@@ -2,6 +2,8 @@
 
 Portable Agent Skill for complex, local-first video production. It combines transcript editing, editable timelines, content-driven Remotion motion, semantic B-roll, finishing, and verified multi-platform delivery.
 
+Its primary presentation specialty is professional talking-head explanation: the speaker remains a visible source of trust while real screens, products, processes, diagrams, or results take over the main stage. The bundled choreography covers animated full-screen-to-PiP transfers, split views, detail zooms, evidence callouts, and speaker returns driven by transcript meaning.
+
 It is self-contained at the Agent Skill level: no additional video-editing or Remotion guidance skill is required. Runtime programs such as FFmpeg, Python transcription packages, Node.js, and Remotion are only needed when the selected production path uses them.
 
 Repository: `Zxzv-arch/video-production-studio-skill` (Public)
@@ -45,12 +47,17 @@ Additional portable helpers cover three frequent handoff gaps:
 # Create a pinned Remotion project without Git/create-video
 python scripts/bootstrap_remotion_project.py C:\path\to\my-video-project\remotion
 
+# Create the presenter + demonstration + animated PiP starter
+python scripts/bootstrap_remotion_project.py C:\path\to\my-video-project\remotion --template talking-head-demo
+
 # Convert source word timestamps through the approved edit manifest
 python scripts/retime_captions.py words.json edit-manifest.json captions.karaoke.json --fps 30
 
 # Register a supplemental artifact without changing the workflow stage
 python scripts/video_project.py register --project-root C:\path\to\my-video-project --artifact exports\final-v2.mp4 --role final
 ```
+
+The talking-head starter renders immediately with labeled placeholders. Add the presenter and demonstration files to `public/`, set `speakerSrc` and `demoSrc`, and replace the example scene schedule with transcript-linked cues.
 
 ## What to copy
 
@@ -59,7 +66,7 @@ Copy or clone the **entire repository folder**, not only `SKILL.md`. The entry f
 | Path | Role |
 | --- | --- |
 | `SKILL.md` | Required portable Agent Skill entry point. |
-| `references/` | Editing, karaoke captions, energetic short-form, B-roll, Remotion, render-budget, music/audio, and delivery guidance loaded on demand. |
+| `references/` | Editing, talking-head demonstration choreography, karaoke captions, energetic short-form, B-roll, Remotion, render-budget, music/audio, and delivery guidance loaded on demand. |
 | `scripts/` | Optional but recommended guided project interface and environment checks. |
 | `agents/openai.yaml` | Optional OpenAI/Codex UI metadata. Other compatible agents can safely ignore it. |
 

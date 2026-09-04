@@ -2,6 +2,8 @@
 
 Use when the edit needs diagrams, UI demonstrations, kinetic typography, branded explainers, data-driven scenes, or reusable video templates.
 
+For a talking-head video in which the speaker must remain visible while real product, screen, process, or diagram evidence is demonstrated, also read `talking-head-demonstrations.md`. It defines the continuous-presenter architecture, picture-in-picture state changes, and semantic scene schedule.
+
 This reference is self-contained for ordinary Remotion video production. Do not request a separate Remotion guidance skill. If an API is absent from the installed version or a current upgrade is explicitly requested, consult the installed package types or official Remotion documentation.
 
 ## Map meaning to motion
@@ -61,9 +63,10 @@ Provide a lower-motion treatment when large zooms, rapid direction changes, full
 ## Talking-head integration
 
 - Keep the face prominent during introductions, opinions, and trust-building statements.
-- Shift, dim, crop, or place the speaker in picture-in-picture while diagrams carry technical explanations.
+- Keep one continuous presenter/media clock across layout changes when possible. Shift, dim, crop, or place that same layer in picture-in-picture while demonstrations carry technical explanations; do not restart the presenter clip merely because the visual scene changed.
 - Reintroduce the face after dense graphics to reset attention.
 - Place captions in a protected layer above all graphics and verify the longest line.
+- Author a frame-based scene schedule with explicit `speaker-full`, `demo-with-pip`, `split`, `demo-detail`, and `speaker-return` states. Scene changes follow claims and demonstration events, not a decorative timer.
 
 ## Caption implementation
 
@@ -113,3 +116,9 @@ For HEVC, 10-bit, HDR, variable-frame-rate, or camera formats that preview unrel
 7. Probe pixel format and color range/space/transfer/primaries, and compare representative pixels against the approved preview. Chromium/Remotion does not guarantee one universal tag combination. Remux or retag only when the pixels are already correct and the existing metadata is demonstrably wrong; otherwise perform an explicit color conversion.
 
 Use `npx remotion studio --no-open` for interactive preview, `npx remotion still <composition-id> --frame <n>` for representative frame checks, and `npx remotion render <composition-id> <output>` for requested output. Rendering authorization follows the user's requested deliverable; opening Studio alone is not proof that the composition renders.
+
+For a new presenter-led project, the bundled no-Git scaffold can generate a working layout starter:
+
+```text
+python scripts/bootstrap_remotion_project.py <project-directory> --template talking-head-demo
+```

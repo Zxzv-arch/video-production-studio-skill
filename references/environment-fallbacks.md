@@ -37,6 +37,8 @@ npm run browser:ensure
 npm run studio
 ```
 
+For presenter-led explainers, add `--template talking-head-demo` to generate the animated continuous-presenter, evidence-stage, and scene-schedule starter instead of the minimal title card.
+
 The generator writes exact dependency versions plus `package.json`, `tsconfig.json`, `remotion.config.ts`, and explicit source entry files. Before intentionally upgrading, query the current compatible Remotion version, pass it with `--remotion-version`, keep every `remotion` and `@remotion/*` package on exactly that version, and validate a still plus a short render.
 
 Newer npm releases may report or block unreviewed dependency lifecycle scripts. Do not assume a skipped script is harmless, and do not globally enable all scripts. Inspect the exact npm message and package; use the review command exposed by that installed npm (`npm approve-scripts --allow-scripts-pending` or `npm install-scripts ls`, depending on version), review the pinned dependency, then approve only the required package/version. A blocked native or bundler install script such as esbuild's platform validation can leave an apparently installed dependency unusable.

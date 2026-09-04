@@ -1,6 +1,6 @@
 ---
 name: video-production-studio
-description: Self-contained planning, editing, animation, captioning, mixing, and delivery for complex local video projects, including transcript-driven long-form cuts, multi-track timelines, content-driven Remotion explainers, semantic B-roll, and multi-platform variants. Use for substantial video creation or revision; do not use for simple playback, metadata lookup, or a one-off codec conversion with no editorial decisions.
+description: Self-contained production for professional talking-head explainers and other complex local videos, including transcript-driven edits, animated speaker-to-demo layouts, picture-in-picture choreography, real product or process demonstrations, Remotion scenes, captions, mixing, timelines, and multi-platform delivery. Use for substantial video creation or revision; do not use for simple playback, metadata lookup, or a one-off codec conversion with no editorial decisions.
 license: Apache-2.0
 metadata:
   self-contained: "true"
@@ -9,7 +9,7 @@ metadata:
 
 # Video Production Studio
 
-Turn source media into a verified, editable video package. Treat spoken meaning and narrative purpose as the timing source; effects are not decoration.
+Turn source media into a verified, editable video package. The primary presentation pattern is a professional talking-head explanation that alternates visible speaker presence with concrete demonstrations and evidence. Treat spoken meaning and narrative purpose as the timing source; effects are not decoration.
 
 ## Self-contained capability contract
 
@@ -48,6 +48,7 @@ Choose only the references needed for the current job:
 - Long interviews, podcasts, filler removal, silence tightening, speaker-based edits: read [references/transcript-editing.md](references/transcript-editing.md).
 - Cut selection, pacing, transitions, color, sound, captions, speed changes, and compositing: read [references/editorial-craft.md](references/editorial-craft.md).
 - Content-driven explainers, kinetic typography, diagrams, UI demonstrations, or Remotion: read [references/remotion-and-motion.md](references/remotion-and-motion.md).
+- Talking-head explainers that combine a visible speaker with screen recordings, product proof, diagrams, animated picture-in-picture, or semantic scene scheduling: read [references/talking-head-demonstrations.md](references/talking-head-demonstrations.md) together with [references/remotion-and-motion.md](references/remotion-and-motion.md).
 - Product demos, cinematic shot planning, camera language, styleframes, or screen-capture storytelling: read [references/shot-direction.md](references/shot-direction.md).
 - B-roll planning, generated visuals, highlight extraction, or multiple short versions: read [references/broll-and-variants.md](references/broll-and-variants.md).
 - Long-form-to-short-form selection, vertical reframing, candidate scoring, or batch social clips: read [references/shortform-selection.md](references/shortform-selection.md).
@@ -65,6 +66,7 @@ Choose only the references needed for the current job:
 1. Initialize or resume the guided project. Inventory source material and constraints: audience, destination, aspect ratios, target duration, must-keep moments, privacy, login/network limits, and delivery format. Select and record the current render mode; use `draft` when approval state is unknown. Infer low-risk defaults instead of blocking.
 2. Transcribe speech with word timestamps when dialogue drives the cut. Use `scripts/transcribe_local.py` when Faster Whisper is available.
 3. Build a semantic outline: hook, setup, development, proof, payoff, and call to action. Map each spoken claim to one visual purpose.
+   For a talking-head explainer, also build a speaker/demo scene schedule. Keep the speaker visible for trust and interpretation; give the main stage to real demonstrations or evidence when the words describe a concrete action or result.
 4. Create an edit manifest before heavy rendering. Use `scripts/build_edit_manifest.py` to seed timings from SRT, then enrich it with editorial decisions.
 5. After edit timing is approved, generate output-timeline word captions with `scripts/retime_captions.py`; keep raw word timing immutable and corrections disclosed.
 6. In `draft`, render representative stills or short ranges before a complete low-resolution preview. Correct timing, hierarchy, caption placement, and motion language before promotion.
@@ -79,6 +81,7 @@ Choose only the references needed for the current job:
 - Prefer clean cuts and purposeful reframing. Reserve glitch, zoom, flash, and whip effects for semantic impacts or chapter changes.
 - Maintain one hero action per beat. Supporting and ambient motion must remain subordinate.
 - For talking heads, alternate trust-building face time with diagrams, UI, examples, and B-roll. Do not cover the face or captions with persistent graphics.
+- Prefer visible implementation over decorative motion: when the speaker explains a step, feature, comparison, or result, show the corresponding real screen, object, process, or clearly labeled reconstruction. Use animated picture-in-picture to preserve speaker continuity while the evidence becomes primary.
 - For generated B-roll, disclose uncertainty and avoid presenting synthetic imagery as documentary evidence.
 
 ## Deliverables

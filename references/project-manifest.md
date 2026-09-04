@@ -44,7 +44,18 @@ Prefer creating and updating the manifest through `scripts/video_project.py` for
     }
   ],
   "visualBeats": [
-    {"startMs": 1200, "endMs": 3600, "purpose": "demonstrate feature", "treatment": "ui-demo"}
+    {
+      "id": "feature-demo",
+      "startMs": 1200,
+      "endMs": 3600,
+      "purpose": "demonstrate",
+      "sceneType": "demo-with-pip",
+      "treatment": "real-ui-demo",
+      "evidenceAsset": "assets/broll/feature-demo.mp4",
+      "speaker": {"visible": true, "anchor": "top-right"},
+      "heroAction": "show the control changing the result",
+      "captionRegion": "bottom-safe"
+    }
   ],
   "assets": [
     {
@@ -84,6 +95,7 @@ Prefer creating and updating the manifest through `scripts/video_project.py` for
 - Record why content was removed when the decision may be revisited.
 - Add a new manifest version or variant entry when timing changes materially.
 - Track generated assets with prompt, provider/model, license or usage constraints, and whether they depict a real event.
+- For presenter-led explainers, make `visualBeats` an executable scene schedule: include `sceneType`, evidence provenance, speaker visibility/anchor, hero action, caption region, and normalized focus coordinates when an annotation targets the evidence. Prefer real implementation or verified proof over generic illustrative motion.
 - Track music, effects, stock, fonts, and generated media in `assets`; a local file without license provenance is not automatically cleared for publication.
 - Update deliverable status only after the corresponding artifact exists and passes validation.
 - Treat `renderPlan.activeMode` as the current cost and validation budget, not as proof of quality. Preserve mode changes in workflow history, store representative timing measurements in `renderPlan.benchmarks`, and use `master` only for final candidates or fidelity-dependent tests.
