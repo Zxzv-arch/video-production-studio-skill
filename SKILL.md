@@ -15,6 +15,8 @@ Turn source media into a verified, editable video package. The primary presentat
 
 This folder contains the editorial and Remotion guidance required for the workflow. Do not tell the user to install, load, or invoke another video-editing or Remotion guidance skill. Do not pause merely because another agent skill is unavailable. Read the routed references in this folder and continue.
 
+Use Remotion as a deliberate orchestration layer when it fits the deliverable, not as a generic title generator. During visual planning, consider its full relevant capability surface—continuous media layouts, data-driven scenes, kinetic typography, annotations, captions, audio, transitions, parameters, vector/canvas work, maps, audio visualization, and optional 3D—then select only what serves the content. An already available specialist Skill may inform implementation, but this Skill must retain its own instructions and fallback instead of turning that Skill into a user-facing dependency.
+
 Execution software is different from an agent skill: FFmpeg is needed for many media operations, Python packages may be needed for local transcription, and Node.js plus Remotion are needed to render a Remotion composition. Detect these with `python scripts/video_project.py doctor`; use an available equivalent or report the exact missing executable only when the current deliverable truly depends on it. Doctor may show platform-specific bootstrap commands, but never run them without authorization to install local software.
 
 Run `doctor --project-root <dir> --write --json` before choosing an engine. Read [references/environment-fallbacks.md](references/environment-fallbacks.md) when a required executable, package, GPU, GUI editor, browser, or network connection is absent. Continue with a lower-capability route when it still satisfies the deliverable; never pretend an unavailable component ran.
@@ -47,7 +49,7 @@ Choose only the references needed for the current job:
 
 - Long interviews, podcasts, filler removal, silence tightening, speaker-based edits: read [references/transcript-editing.md](references/transcript-editing.md).
 - Cut selection, pacing, transitions, color, sound, captions, speed changes, and compositing: read [references/editorial-craft.md](references/editorial-craft.md).
-- Content-driven explainers, kinetic typography, diagrams, UI demonstrations, or Remotion: read [references/remotion-and-motion.md](references/remotion-and-motion.md).
+- Content-driven explainers, kinetic typography, diagrams, UI demonstrations, or Remotion: read [references/remotion-capability-routing.md](references/remotion-capability-routing.md) and [references/remotion-and-motion.md](references/remotion-and-motion.md).
 - Talking-head explainers that combine a visible speaker with screen recordings, product proof, diagrams, animated picture-in-picture, or semantic scene scheduling: read [references/talking-head-demonstrations.md](references/talking-head-demonstrations.md), [references/realtime-content-animation.md](references/realtime-content-animation.md), and [references/remotion-and-motion.md](references/remotion-and-motion.md).
 - Product demos, cinematic shot planning, camera language, styleframes, or screen-capture storytelling: read [references/shot-direction.md](references/shot-direction.md).
 - B-roll planning, generated visuals, highlight extraction, or multiple short versions: read [references/broll-and-variants.md](references/broll-and-variants.md).
@@ -65,7 +67,7 @@ Choose only the references needed for the current job:
 
 1. Initialize or resume the guided project. Inventory source material and constraints: audience, destination, aspect ratios, target duration, must-keep moments, privacy, login/network limits, and delivery format. Select and record the current render mode; use `draft` when approval state is unknown. Infer low-risk defaults instead of blocking.
 2. Transcribe speech with word timestamps when dialogue drives the cut. Use `scripts/transcribe_local.py` when Faster Whisper is available.
-3. Build a semantic outline: hook, setup, development, proof, payoff, and call to action. Map each spoken claim to one visual purpose.
+3. Build a semantic outline: hook, setup, development, proof, payoff, and call to action. Map each spoken claim to one visual purpose. Run a capability design pass before writing scenes: choose the strongest appropriate Remotion treatment or a better specialist engine for each beat, record why it helps, and define an honest fallback.
    For a talking-head explainer, also build one speech-linked event schedule that drives the presenter layout, evidence state, and selective semantic typography. Keep the speaker visible for trust and interpretation; give the main stage to real demonstrations or evidence when the words describe a concrete action or result.
 4. Create an edit manifest before heavy rendering. Use `scripts/build_edit_manifest.py` to seed timings from SRT, then enrich it with editorial decisions.
 5. After edit timing is approved, generate output-timeline word captions with `scripts/retime_captions.py`; keep raw word timing immutable and corrections disclosed.
@@ -83,6 +85,7 @@ Choose only the references needed for the current job:
 - For talking heads, alternate trust-building face time with diagrams, UI, examples, and B-roll. Do not cover the face or captions with persistent graphics.
 - Prefer visible implementation over decorative motion: when the speaker explains a step, feature, comparison, or result, show the corresponding real screen, object, process, or clearly labeled reconstruction. Use animated picture-in-picture to preserve speaker continuity while the evidence becomes primary.
 - Synchronize PiP, demonstration actions, and dynamic words to the same output-timeline transcript events. Animate only important concepts, actions, and verified values; ordinary spoken subtitles remain the readable global caption layer.
+- Exploit advanced capabilities only when they improve comprehension or proof. Maps require geographic meaning, audio visualization requires meaningful audio, 3D requires spatial meaning, and elaborate transitions require a semantic relationship. Capability breadth is a palette, not a quota.
 - For generated B-roll, disclose uncertainty and avoid presenting synthetic imagery as documentary evidence.
 
 ## Deliverables

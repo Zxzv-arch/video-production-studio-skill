@@ -2,7 +2,7 @@
 
 Portable Agent Skill for complex, local-first video production. It combines transcript editing, editable timelines, content-driven Remotion motion, semantic B-roll, finishing, and verified multi-platform delivery.
 
-Its primary presentation specialty is professional talking-head explanation: the speaker remains a visible source of trust while real screens, products, processes, diagrams, or results take over the main stage. The bundled choreography covers animated full-screen-to-PiP transfers, live proof steps, dynamic letters and keywords, result feedback, split views, detail zooms, and speaker returns driven by transcript meaning.
+Its primary presentation specialty is professional talking-head explanation: the speaker remains a visible source of trust while real screens, products, processes, diagrams, or results take over the main stage. The bundled choreography covers animated full-screen-to-PiP transfers, live proof steps, dynamic letters and keywords, result feedback, split views, detail zooms, and speaker returns driven by transcript meaning. A capability-routing pass actively considers the relevant Remotion surface—rather than reducing every project to generic cards and zooms—and selects richer techniques only when they improve comprehension or proof.
 
 It is self-contained at the Agent Skill level: no additional video-editing or Remotion guidance skill is required. Runtime programs such as FFmpeg, Python transcription packages, Node.js, and Remotion are only needed when the selected production path uses them.
 
@@ -66,7 +66,7 @@ Copy or clone the **entire repository folder**, not only `SKILL.md`. The entry f
 | Path | Role |
 | --- | --- |
 | `SKILL.md` | Required portable Agent Skill entry point. |
-| `references/` | Editing, talking-head demonstration choreography, karaoke captions, energetic short-form, B-roll, Remotion, render-budget, music/audio, and delivery guidance loaded on demand. |
+| `references/` | Editing, talking-head demonstration choreography, Remotion capability routing, karaoke captions, energetic short-form, B-roll, render-budget, music/audio, and delivery guidance loaded on demand. |
 | `scripts/` | Optional but recommended guided project interface and environment checks. |
 | `agents/openai.yaml` | Optional OpenAI/Codex UI metadata. Other compatible agents can safely ignore it. |
 
