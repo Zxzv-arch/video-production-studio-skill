@@ -60,16 +60,19 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
               mode: StageMode;
               eyebrow: string;
               headline: string;
+              accentWords?: readonly string[];
               callout?: string;
               focusTarget?: {x: number; y: number; width: number; height: number};
+              demoSteps?: readonly string[];
+              resultLabel?: string;
             };
 
             // Replace these example cues with transcript-linked output-timeline beats.
             export const sceneSchedule: readonly SceneCue[] = [
-              {id: 'hook', from: 0, durationInFrames: 90, mode: 'speaker-full', eyebrow: 'THE PROMISE', headline: 'Start with the person and the outcome'},
-              {id: 'proof', from: 90, durationInFrames: 120, mode: 'demo-with-pip', eyebrow: 'REAL DEMO', headline: 'Let the implementation take the main stage', callout: 'Show the action, then the changed state', focusTarget: {x: 0.50, y: 0.48, width: 0.24, height: 0.18}},
-              {id: 'compare', from: 210, durationInFrames: 75, mode: 'split', eyebrow: 'WHY IT WORKS', headline: 'Keep the explanation beside the evidence', callout: 'One hero action per beat', focusTarget: {x: 0.12, y: 0.45, width: 0.44, height: 0.20}},
-              {id: 'return', from: 285, durationInFrames: 75, mode: 'speaker-return', eyebrow: 'SYNTHESIS', headline: 'Return to the speaker for meaning and next steps'},
+              {id: 'hook', from: 0, durationInFrames: 90, mode: 'speaker-full', eyebrow: 'THE PROMISE', headline: 'Start with the person and the outcome', accentWords: ['outcome']},
+              {id: 'proof', from: 90, durationInFrames: 120, mode: 'demo-with-pip', eyebrow: 'REAL DEMO', headline: 'Watch the workflow happen live', accentWords: ['live'], callout: 'Speech drives every visible state', focusTarget: {x: 0.50, y: 0.48, width: 0.24, height: 0.18}, demoSteps: ['Open', 'Change', 'Confirm'], resultLabel: 'RESULT VERIFIED'},
+              {id: 'compare', from: 210, durationInFrames: 75, mode: 'split', eyebrow: 'WHY IT WORKS', headline: 'Keep the explanation beside the evidence', accentWords: ['evidence'], callout: 'One hero action per beat', focusTarget: {x: 0.12, y: 0.45, width: 0.44, height: 0.20}, demoSteps: ['Before', 'After'], resultLabel: 'CHANGE IS VISIBLE'},
+              {id: 'return', from: 285, durationInFrames: 75, mode: 'speaker-return', eyebrow: 'SYNTHESIS', headline: 'Return to the speaker for meaning and next steps', accentWords: ['meaning']},
             ];
             """
         ).lstrip(),
@@ -136,13 +139,52 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
               </AbsoluteFill>
             );
 
-            const BeatCopy: React.FC<{from: number; durationInFrames: number; mode: StageMode; eyebrow: string; headline: string; callout?: string}> = ({from, durationInFrames, mode, eyebrow, headline, callout}) => (
+            const AnimatedHeadline: React.FC<{text: string; compact: boolean; accentWords?: readonly string[]}> = ({text, compact, accentWords}) => {
+              const frame = useCurrentFrame();
+              const tokens = text.match(/\\S+\\s*/gu) ?? [text];
+              let glyphOffset = 0;
+              return (
+                <div aria-label={text} style={{display: 'flex', flexWrap: 'wrap', whiteSpace: 'pre-wrap', fontSize: compact ? 38 : 50, lineHeight: 1.06, fontWeight: 800, marginTop: 12, textShadow: '0 3px 20px rgba(0,0,0,0.55)'}}>
+                  {tokens.map((token, tokenIndex) => {
+                    const tokenGlyphs = Array.from(token);
+                    const tokenOffset = glyphOffset;
+                    glyphOffset += tokenGlyphs.length;
+                    const normalizedToken = token.trim().replace(/[^\\p{L}\\p{N}]+/gu, '').toLocaleLowerCase();
+                    const accented = accentWords?.some((word) => word.toLocaleLowerCase() === normalizedToken) ?? false;
+                    return (
+                      <span key={`${token}-${tokenIndex}`} style={{display: 'inline-block', whiteSpace: 'pre'}}>
+                        {tokenGlyphs.map((glyph, glyphIndex) => {
+                          const start = Math.min(18, (tokenOffset + glyphIndex) * 1.15);
+                          return (
+                            <span
+                              aria-hidden
+                              key={`${glyph}-${glyphIndex}`}
+                              style={{
+                                display: 'inline-block',
+                                color: accented ? '#67e8f9' : 'white',
+                                opacity: interpolate(frame, [start, start + 8], [0, 1], {easing: Easing.bezier(0.16, 1, 0.3, 1), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+                                scale: interpolate(frame, [start, start + 10], [0.82, 1], {easing: Easing.spring({damping: 20, stiffness: 260}), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+                                translate: interpolate(frame, [start, start + 9], ['0px 18px', '0px 0px'], {easing: Easing.bezier(0.16, 1, 0.3, 1), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+                              }}
+                            >
+                              {glyph}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    );
+                  })}
+                </div>
+              );
+            };
+
+            const BeatCopy: React.FC<{from: number; durationInFrames: number; mode: StageMode; eyebrow: string; headline: string; accentWords?: readonly string[]; callout?: string}> = ({from, durationInFrames, mode, eyebrow, headline, accentWords, callout}) => (
               <Sequence from={from} durationInFrames={durationInFrames} premountFor={30}>
-                <BeatCopyLocal mode={mode} eyebrow={eyebrow} headline={headline} callout={callout} />
+                <BeatCopyLocal mode={mode} eyebrow={eyebrow} headline={headline} accentWords={accentWords} callout={callout} />
               </Sequence>
             );
 
-            const BeatCopyLocal: React.FC<{mode: StageMode; eyebrow: string; headline: string; callout?: string}> = ({mode, eyebrow, headline, callout}) => {
+            const BeatCopyLocal: React.FC<{mode: StageMode; eyebrow: string; headline: string; accentWords?: readonly string[]; callout?: string}> = ({mode, eyebrow, headline, accentWords, callout}) => {
               const frame = useCurrentFrame();
               const demonstrationIsPrimary = mode === 'demo-with-pip' || mode === 'demo-detail' || mode === 'split';
               const opacity = interpolate(frame, [0, 12], [0, 1], {easing: Easing.bezier(0.16, 1, 0.3, 1), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
@@ -150,8 +192,42 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
               return (
                 <div style={{position: 'absolute', left: 72, top: 62, width: demonstrationIsPrimary ? 560 : 760, color: 'white', fontFamily: 'Arial, sans-serif', opacity, translate: `0px ${y}px`, zIndex: 5}}>
                   <div style={{fontSize: 22, fontWeight: 800, letterSpacing: 3, color: '#67e8f9'}}>{eyebrow}</div>
-                  <div style={{fontSize: demonstrationIsPrimary ? 38 : 50, lineHeight: 1.06, fontWeight: 800, marginTop: 12, textShadow: '0 3px 20px rgba(0,0,0,0.55)'}}>{headline}</div>
+                  <AnimatedHeadline text={headline} compact={demonstrationIsPrimary} accentWords={accentWords} />
                   {callout ? <div style={{display: 'inline-block', marginTop: 18, padding: '10px 16px', borderRadius: 999, backgroundColor: 'rgba(5,12,25,0.82)', border: '1px solid rgba(103,232,249,0.6)', fontSize: 22}}>{callout}</div> : null}
+                </div>
+              );
+            };
+
+            const LiveDemoSteps: React.FC<{from: number; durationInFrames: number; steps: readonly string[]; resultLabel?: string}> = ({from, durationInFrames, steps, resultLabel}) => (
+              <Sequence from={from} durationInFrames={durationInFrames} premountFor={30}>
+                <LiveDemoStepsLocal steps={steps} resultLabel={resultLabel} />
+              </Sequence>
+            );
+
+            const LiveDemoStepsLocal: React.FC<{steps: readonly string[]; resultLabel?: string}> = ({steps, resultLabel}) => {
+              const frame = useCurrentFrame();
+              const railStart = 28;
+              const resultStart = railStart + steps.length * 12 + 4;
+              return (
+                <div style={{position: 'absolute', left: 92, top: 770, display: 'flex', alignItems: 'center', gap: 12, zIndex: 2, fontFamily: 'Arial, sans-serif'}}>
+                  {steps.map((step, stepIndex) => {
+                    const start = railStart + stepIndex * 12;
+                    const active = interpolate(frame, [start, start + 8], [0, 1], {easing: Easing.bezier(0.16, 1, 0.3, 1), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+                    return (
+                      <React.Fragment key={step}>
+                        {stepIndex > 0 ? <div style={{width: 42, height: 3, borderRadius: 999, backgroundColor: '#67e8f9', transformOrigin: 'left', scale: `${interpolate(frame, [start - 8, start], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} 1`, opacity: 0.85}} /> : null}
+                        <div style={{display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 16, backgroundColor: `rgba(5, 12, 25, ${0.72 + active * 0.18})`, border: `2px solid rgba(103, 232, 249, ${0.28 + active * 0.72})`, color: 'white', opacity: 0.38 + active * 0.62, scale: 0.9 + active * 0.1, boxShadow: active > 0.98 ? '0 10px 30px rgba(6,182,212,0.2)' : 'none'}}>
+                          <span style={{display: 'grid', placeItems: 'center', width: 26, height: 26, borderRadius: 999, backgroundColor: active > 0.98 ? '#22d3ee' : '#334155', color: '#06101c', fontSize: 16, fontWeight: 900}}>{stepIndex + 1}</span>
+                          <span style={{fontSize: 20, fontWeight: 800}}>{step}</span>
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                  {resultLabel ? (
+                    <div style={{marginLeft: 14, padding: '12px 18px', borderRadius: 999, backgroundColor: '#a3e635', color: '#122006', fontSize: 19, fontWeight: 900, letterSpacing: 1.2, opacity: interpolate(frame, [resultStart, resultStart + 8], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}), scale: interpolate(frame, [resultStart, resultStart + 10], [0.78, 1], {easing: Easing.spring({damping: 18, stiffness: 280}), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
+                      {resultLabel}
+                    </div>
+                  ) : null}
                 </div>
               );
             };
@@ -189,6 +265,7 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
                   </div>
 
                   {sceneSchedule.map((item) => <BeatCopy key={item.id} {...item} />)}
+                  {sceneSchedule.map((item) => item.demoSteps ? <LiveDemoSteps key={`${item.id}-demo-steps`} from={item.from} durationInFrames={item.durationInFrames} steps={item.demoSteps} resultLabel={item.resultLabel} /> : null)}
 
                   <div style={{position: 'absolute', left: 0, bottom: 0, width: `${(frame / Math.max(1, durationInFrames - 1)) * 100}%`, height: 7, backgroundColor: '#67e8f9', zIndex: 8}} />
                 </AbsoluteFill>

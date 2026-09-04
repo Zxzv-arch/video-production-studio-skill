@@ -4,6 +4,8 @@ Use when the edit needs diagrams, UI demonstrations, kinetic typography, branded
 
 For a talking-head video in which the speaker must remain visible while real product, screen, process, or diagram evidence is demonstrated, also read `talking-head-demonstrations.md`. It defines the continuous-presenter architecture, picture-in-picture state changes, and semantic scene schedule.
 
+When narration must trigger live evidence actions, dynamic words or letters, step progression, and visible result states, also read `realtime-content-animation.md`. Use one output-timeline event track for all of those reactions instead of timing each layer independently.
+
 This reference is self-contained for ordinary Remotion video production. Do not request a separate Remotion guidance skill. If an API is absent from the installed version or a current upgrade is explicitly requested, consult the installed package types or official Remotion documentation.
 
 ## Map meaning to motion
@@ -67,6 +69,7 @@ Provide a lower-motion treatment when large zooms, rapid direction changes, full
 - Reintroduce the face after dense graphics to reset attention.
 - Place captions in a protected layer above all graphics and verify the longest line.
 - Author a frame-based scene schedule with explicit `speaker-full`, `demo-with-pip`, `split`, `demo-detail`, and `speaker-return` states. Scene changes follow claims and demonstration events, not a decorative timer.
+- Link selective keyword/letter animation and evidence actions to word-timestamp-derived motion events. The visual order is transfer, orient, act, confirm, then hold; do not animate the whole caption as a competing title.
 
 ## Caption implementation
 

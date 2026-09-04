@@ -29,8 +29,15 @@ class BootstrapRemotionProjectTests(unittest.TestCase):
             self.assertIn("demo-with-pip", schedule)
             self.assertIn("speaker-return", schedule)
             self.assertIn("focusTarget", schedule)
+            self.assertIn("demoSteps", schedule)
+            self.assertIn("resultLabel", schedule)
             self.assertEqual(composition.count("<Surface src={speakerSrc}"), 1)
             self.assertIn("sceneSchedule.map", composition)
+            self.assertIn("const AnimatedHeadline", composition)
+            self.assertIn("Array.from(token)", composition)
+            self.assertIn("accentWords", schedule)
+            self.assertIn("const LiveDemoSteps", composition)
+            self.assertIn("RESULT VERIFIED", schedule)
             self.assertEqual(package["dependencies"]["@remotion/media"], package["dependencies"]["remotion"])
 
     def test_minimal_template_remains_default(self) -> None:

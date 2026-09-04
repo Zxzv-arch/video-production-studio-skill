@@ -2,7 +2,7 @@
 
 Portable Agent Skill for complex, local-first video production. It combines transcript editing, editable timelines, content-driven Remotion motion, semantic B-roll, finishing, and verified multi-platform delivery.
 
-Its primary presentation specialty is professional talking-head explanation: the speaker remains a visible source of trust while real screens, products, processes, diagrams, or results take over the main stage. The bundled choreography covers animated full-screen-to-PiP transfers, split views, detail zooms, evidence callouts, and speaker returns driven by transcript meaning.
+Its primary presentation specialty is professional talking-head explanation: the speaker remains a visible source of trust while real screens, products, processes, diagrams, or results take over the main stage. The bundled choreography covers animated full-screen-to-PiP transfers, live proof steps, dynamic letters and keywords, result feedback, split views, detail zooms, and speaker returns driven by transcript meaning.
 
 It is self-contained at the Agent Skill level: no additional video-editing or Remotion guidance skill is required. Runtime programs such as FFmpeg, Python transcription packages, Node.js, and Remotion are only needed when the selected production path uses them.
 
@@ -57,7 +57,7 @@ python scripts/retime_captions.py words.json edit-manifest.json captions.karaoke
 python scripts/video_project.py register --project-root C:\path\to\my-video-project --artifact exports\final-v2.mp4 --role final
 ```
 
-The talking-head starter renders immediately with labeled placeholders. Add the presenter and demonstration files to `public/`, set `speakerSrc` and `demoSrc`, and replace the example scene schedule with transcript-linked cues.
+The talking-head starter renders immediately with labeled placeholders. Add the presenter and demonstration files to `public/`, set `speakerSrc` and `demoSrc`, and replace the example scene schedule with transcript-linked cues and semantic motion events. Its sample proof beat demonstrates a continuous speaker-to-PiP move, a word/letter reveal, step progression, focus annotation, and confirmed result state.
 
 ## What to copy
 

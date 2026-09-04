@@ -4,6 +4,8 @@ Use this reference for presenter-led explanations, tutorials, reviews, training,
 
 The default visual promise is: **see the person, see the proof, understand the relationship**. Do not turn a talking-head video into uninterrupted face footage with decorative captions, and do not hide the speaker behind a full-screen slideshow for long stretches without a narrative reason.
 
+When the demonstration and kinetic text must react at exact spoken moments, also use `realtime-content-animation.md`. It defines the shared semantic event track for presenter layout, evidence actions, dynamic words, and result feedback.
+
 ## Build a proof-led scene schedule
 
 For every transcript beat, record:
@@ -17,6 +19,7 @@ For every transcript beat, record:
 - entry/exit event, not just elapsed time;
 - caption region and collision risks;
 - source milliseconds plus composition frames.
+- triggering source word indexes and the realtime motion event that fires at that phrase.
 
 Use this evidence order:
 
@@ -49,6 +52,8 @@ Use four persistent layers in the master composition:
 2. **Presenter stage:** one continuous visible presenter layer whose box, crop, corner radius, elevation, and anchor animate between schedule states.
 3. **Evidence stage:** screen recording, product footage, diagram, screenshot, or comparison controlled by scene sequences.
 4. **Global information layer:** captions, disclosure labels, progress, and accessibility-safe overlays above both stages.
+
+Within the evidence and information layers, treat each spoken proof beat as an ordered micro-story: presenter transfer → evidence orientation → visible action → changed result → readable hold. Dynamic letters or keywords may support one of those phases, but must not compete with the proof or duplicate the caption line.
 
 Avoid mounting a fresh audible presenter `<Video>` inside every scene. Repeated media instances can restart decoding, duplicate audio, create discontinuities, and make layout changes feel like cuts. Keep one audible presenter timeline where practical; make demonstration media muted unless its sound is intentionally mixed.
 
@@ -92,6 +97,7 @@ Avoid perpetual zooming, repeated bounce entrances, random glitch, full-frame sp
 ## Remotion implementation pattern
 
 - Put the scene schedule in a typed data module with `from`, `durationInFrames`, `mode`, claim, evidence asset, presenter anchor, and optional focus target.
+- Add speech-linked semantic events for important keywords, steps, UI actions, diagram states, metrics, and results. Store event timing in output frames produced from the same word timestamps as captions.
 - Keep the presenter layer mounted outside the per-scene `<Sequence>` elements. Derive its current and previous layout boxes from the active cue and interpolate between them with clamped frame-based easing.
 - Put each major evidence scene in its own named component. Use `<Sequence premountFor={...}>` for media-bearing scenes; keep edit-critical timings explicit.
 - Use `<Video>` and `<Audio>` from `@remotion/media`, local assets through `staticFile()`, and a muted evidence track unless its audio is intentionally used.
@@ -123,6 +129,11 @@ Store the portable editorial form in `project.json` or the edit manifest:
   "speaker": {"visible": true, "anchor": "top-right"},
   "focusTarget": {"x": 0.18, "y": 0.32, "width": 0.42, "height": 0.22},
   "heroAction": "cursor changes the setting and the result updates",
+  "motionEvents": [
+    {"kind": "keyword", "startMs": 8420, "endMs": 9200, "label": "configure", "sourceWordIndexes": [118]},
+    {"kind": "ui-action", "startMs": 9360, "endMs": 10500, "label": "enable setting", "sourceWordIndexes": [121, 122]},
+    {"kind": "result", "startMs": 10500, "endMs": 12300, "label": "setting enabled", "sourceWordIndexes": [123, 124]}
+  ],
   "captionRegion": "bottom-safe"
 }
 ```
