@@ -55,6 +55,14 @@ python scripts/video_project.py status --project-root <project-directory>
 python scripts/video_project.py advance --project-root <project-directory> --artifact analysis/media-inventory.json --note "Probed every source with ffprobe"
 ```
 
+Register an additional artifact without changing stage—including after delivery—with:
+
+```text
+python scripts/video_project.py register --project-root <project-directory> --artifact exports/final-v2.mp4 --role final --note "Replacement export after caption correction"
+```
+
+Use `register` for supplemental finals, caption files, source compositions, license evidence, and QA reports. It appends history; it does not reopen or advance a gate.
+
 ## Blockers
 
 Use blockers only for conditions that require authority, private upload, payment, unavailable source material, or a story-changing decision.

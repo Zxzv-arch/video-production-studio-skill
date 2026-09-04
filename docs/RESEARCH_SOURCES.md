@@ -11,3 +11,10 @@ This project does not require the repositories below at runtime and does not ven
 - [xuliang2024/cutcli-cookbook](https://github.com/xuliang2024/cutcli-cookbook) and [yihui-dev/yh-chatcut-skills](https://github.com/yihui-dev/yh-chatcut-skills) — MIT. Informed editable draft interchange and timestamp-conscious caption handoff.
 
 Repository popularity and activity were considered during research, but quality, license clarity, portability, and complementarity determined what was adopted.
+
+Current tool behavior was checked against primary documentation on 2026-09-03:
+
+- [Remotion `create-video` CLI](https://www.remotion.dev/docs/cli/create-video) — non-interactive flags and repository constraints.
+- [Remotion browser ensure CLI](https://www.remotion.dev/docs/cli/browser/ensure) — browser preflight, download behavior, and browser override.
+- [Remotion configuration](https://www.remotion.dev/docs/config) — current `remotion.config.ts` entry-point convention.
+- [npm install-script policy](https://docs.npmjs.com/cli/v11/commands/npm-install-scripts/) — version-dependent lifecycle-script review and narrow approval workflow.

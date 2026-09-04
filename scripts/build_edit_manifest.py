@@ -96,6 +96,7 @@ def main() -> int:
         "chapters": build_chapters(cues, round(args.gap * 1000), round(args.max_chapter * 1000)),
         "visualBeats": events,
         "edits": [],
+        "corrections": [],
         "deliverables": [],
         "assumptions": [],
         "uncertainties": [],

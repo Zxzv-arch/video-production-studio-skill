@@ -10,6 +10,37 @@ Use this reference after `scripts/video_project.py doctor --project-root <dir> -
 4. If a fallback changes the visual result, editability, privacy, cost, or final format materially, tell the user. Otherwise continue and document it.
 5. Never fabricate a render, transcript, media probe, GUI project, or validation result.
 
+## Authorized environment bootstrap
+
+`doctor` reports capabilities and never installs them. Only run installation commands after the user has authorized local software changes. Re-run `doctor --write --json` afterward and record the executable paths actually selected.
+
+| Capability | Windows (`winget`) | macOS (Homebrew) | Debian/Ubuntu (`apt`) |
+|---|---|---|---|
+| FFmpeg | `winget install --id Gyan.FFmpeg --exact` | `brew install ffmpeg` | `sudo apt update && sudo apt install ffmpeg` |
+| Python | `winget search Python.Python` then install an approved maintained 3.x package by exact ID | `brew install python` | `sudo apt install python3 python3-venv python3-pip` |
+| Node.js/npm | `winget install --id OpenJS.NodeJS.LTS --exact` | `brew install node` | use a maintained Node LTS source appropriate to the host; distro `nodejs` may be too old |
+| Git | `winget install --id Git.Git --exact` | `brew install git` | `sudo apt install git` |
+
+Package IDs and supported versions can change. Search first, capture the selected version, and verify with `ffmpeg -version`, `python --version`, `node --version`, `npm --version`, and `git --version`. Do not silently elevate privileges or work around UAC/sudo denial.
+
+On Windows, `python.exe` may resolve to a Microsoft Store application-execution alias under `WindowsApps` instead of a usable interpreter. Check `Get-Command python` and `py -0p`; use the verified interpreter's absolute path or disable the alias rather than assuming `python` is functional. Keep that path in the project's reproduction commands.
+
+### Remotion without Git or `create-video`
+
+Git is not required to author or render a Remotion project. When `create-video` is unavailable, inappropriate for the current repository, or blocked during scaffolding, generate the bundled pinned minimal project without invoking Git:
+
+```text
+python scripts/bootstrap_remotion_project.py <project-root>/remotion
+cd <project-root>/remotion
+npm install
+npm run browser:ensure
+npm run studio
+```
+
+The generator writes exact dependency versions plus `package.json`, `tsconfig.json`, `remotion.config.ts`, and explicit source entry files. Before intentionally upgrading, query the current compatible Remotion version, pass it with `--remotion-version`, keep every `remotion` and `@remotion/*` package on exactly that version, and validate a still plus a short render.
+
+Newer npm releases may report or block unreviewed dependency lifecycle scripts. Do not assume a skipped script is harmless, and do not globally enable all scripts. Inspect the exact npm message and package; use the review command exposed by that installed npm (`npm approve-scripts --allow-scripts-pending` or `npm install-scripts ls`, depending on version), review the pinned dependency, then approve only the required package/version. A blocked native or bundler install script such as esbuild's platform validation can leave an apparently installed dependency unusable.
+
 ## Capability matrix
 
 | Missing capability | Continue with | Lost or changed | Stop only when |

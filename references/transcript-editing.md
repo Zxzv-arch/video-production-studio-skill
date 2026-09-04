@@ -6,6 +6,8 @@ Use for interviews, podcasts, courses, talking heads, and any edit where speech 
 
 Prefer word-level entries containing `text`, `start`, `end`, `confidence`, and optional `speaker`. Keep the raw transcript immutable and store editorial corrections separately.
 
+Assign stable zero-based source word indexes before editing. A correction record must point back to those indexes and preserve raw text, display text, confidence, basis, review status, and whether it must appear in delivery disclosure. Display captions may use approved corrections; edit decisions and factual audit trails continue to reference the immutable raw words.
+
 Names, product terms, acronyms, measurements, and version numbers deserve manual or contextual verification. Low-confidence terms must not silently become authoritative captions.
 
 ## Silence and filler policy
@@ -25,6 +27,7 @@ Names, product terms, acronyms, measurements, and version numbers deserve manual
 4. Use room tone across tightened gaps; do not leave digital silence.
 5. Hide unavoidable talking-head jumps with a motivated punch-in, alternate angle, diagram, screenshot, or B-roll.
 6. Preserve sync by deriving video and audio cuts from the same edit decision list.
+7. Generate output captions from that decision list with `scripts/retime_captions.py`; never shift source timestamps by hand after each removal.
 
 ## Multiple speakers
 

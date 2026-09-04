@@ -5,8 +5,37 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
+
+
+LATINISH_RE = re.compile(r"^[A-Za-z0-9._+#@/&'|-]+$")
+
+
+def caption_units(words: list[dict], max_join_gap: float = 0.18) -> list[dict]:
+    """Merge ASR fragments that belong to one Latin/product token for grouping only."""
+    units: list[dict] = []
+    for original in words:
+        item = dict(original)
+        raw_text = str(item["text"])
+        item["text"] = raw_text.replace("|", "")
+        previous = units[-1] if units else None
+        candidate = (str(previous["text"]) + item["text"]).strip() if previous else ""
+        can_join = bool(
+            previous
+            and item["start"] - previous["end"] <= max_join_gap
+            and not raw_text[:1].isspace()
+            and candidate
+            and LATINISH_RE.fullmatch(candidate)
+        )
+        if not can_join:
+            if item["text"]:
+                units.append(item)
+            continue
+        previous["text"] += item["text"]
+        previous["end"] = max(previous["end"], item["end"])
+    return units
 
 
 def timestamp(seconds: float) -> str:
@@ -34,7 +63,7 @@ def caption_groups(words: list[dict], max_chars: int, max_duration: float) -> li
         )
         current.clear()
 
-    for word in words:
+    for word in caption_units(words):
         if current and word["start"] - current[-1]["end"] > 0.65:
             flush()
         current.append(word)
@@ -57,6 +86,7 @@ def main() -> int:
     parser.add_argument("--device", default="cpu", choices=["cpu", "cuda", "auto"])
     parser.add_argument("--compute-type", default="int8", help="For example int8, float16, or float32")
     parser.add_argument("--prompt", default=None, help="Optional terminology prompt")
+    parser.add_argument("--source-id", default="primary", help="Stable source ID used by edit manifests")
     parser.add_argument("--max-caption-chars", type=int, default=28)
     parser.add_argument("--max-caption-duration", type=float, default=5.5)
     args = parser.parse_args()
@@ -92,6 +122,8 @@ def main() -> int:
                 continue
             words.append(
                 {
+                    "index": len(words),
+                    "sourceId": args.source_id,
                     "text": word.word,
                     "start": round(float(word.start), 3),
                     "end": round(float(word.end), 3),
@@ -110,6 +142,7 @@ def main() -> int:
         json.dumps(
             {
                 "source": str(args.input),
+                "sourceId": args.source_id,
                 "language": info.language,
                 "languageProbability": info.language_probability,
                 "duration": info.duration,

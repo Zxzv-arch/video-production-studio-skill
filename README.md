@@ -30,6 +30,19 @@ python scripts/video_project.py doctor --project-root C:\path\to\my-video-projec
 
 The report distinguishes planning, FFmpeg editing, local ASR, GPU acceleration, Remotion scaffolding, an installed Remotion runtime, browser capture, and disk capacity. It emits a degraded but honest fallback plan when components are absent.
 
+Additional portable helpers cover three frequent handoff gaps:
+
+```powershell
+# Create a pinned Remotion project without Git/create-video
+python scripts/bootstrap_remotion_project.py C:\path\to\my-video-project\remotion
+
+# Convert source word timestamps through the approved edit manifest
+python scripts/retime_captions.py words.json edit-manifest.json captions.karaoke.json --fps 30
+
+# Register a supplemental artifact without changing the workflow stage
+python scripts/video_project.py register --project-root C:\path\to\my-video-project --artifact exports\final-v2.mp4 --role final
+```
+
 ## What to copy
 
 Copy or clone the **entire repository folder**, not only `SKILL.md`. The entry file links to the bundled workflow references, templates, and project-control script.
@@ -37,7 +50,7 @@ Copy or clone the **entire repository folder**, not only `SKILL.md`. The entry f
 | Path | Role |
 | --- | --- |
 | `SKILL.md` | Required portable Agent Skill entry point. |
-| `references/` | Editing, caption, B-roll, Remotion, audio, and delivery guidance loaded on demand. |
+| `references/` | Editing, karaoke captions, energetic short-form, B-roll, Remotion, music/audio, and delivery guidance loaded on demand. |
 | `scripts/` | Optional but recommended guided project interface and environment checks. |
 | `agents/openai.yaml` | Optional OpenAI/Codex UI metadata. Other compatible agents can safely ignore it. |
 

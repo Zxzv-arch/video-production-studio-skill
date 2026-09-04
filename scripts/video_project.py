@@ -155,6 +155,7 @@ def command_init(args: argparse.Namespace) -> None:
             "stateSource": "project.json",
         },
         "sources": sources,
+        "assets": [],
         "brief": {
             "audience": audience,
             "targetDurationSec": target_duration or None,
@@ -188,6 +189,7 @@ def command_init(args: argparse.Namespace) -> None:
         "decisions": [],
         "assumptions": [],
         "uncertainties": [],
+        "corrections": [],
         "blockers": [],
         "deliverables": [],
     }
@@ -253,6 +255,24 @@ def module_available(name: str) -> bool:
     return importlib.util.find_spec(name) is not None
 
 
+def bootstrap_hints(system: str) -> dict[str, str]:
+    if system == "Windows":
+        return {
+            "ffmpeg": "winget install --id Gyan.FFmpeg --exact",
+            "python": "winget search Python.Python; install an approved maintained 3.x package by exact ID",
+            "node": "winget install --id OpenJS.NodeJS.LTS --exact",
+            "git": "winget install --id Git.Git --exact",
+        }
+    if system == "Darwin":
+        return {"ffmpeg": "brew install ffmpeg", "python": "brew install python", "node": "brew install node", "git": "brew install git"}
+    return {
+        "ffmpeg": "sudo apt update && sudo apt install ffmpeg",
+        "python": "sudo apt install python3 python3-venv python3-pip",
+        "node": "install a maintained Node.js LTS appropriate to this host",
+        "git": "sudo apt install git",
+    }
+
+
 def command_doctor(args: argparse.Namespace) -> None:
     root = Path(args.project_root).expanduser().resolve() if args.project_root else Path.cwd().resolve()
     executable_names = [
@@ -270,9 +290,13 @@ def command_doctor(args: argparse.Namespace) -> None:
     ]
     executables = {name: resolve_executable(name, root) for name in executable_names}
     local_remotion_candidates = [
-        root / "node_modules" / ".bin" / "remotion.cmd",
-        root / "node_modules" / ".bin" / "remotion",
-        root / "node_modules" / "remotion" / "package.json",
+        candidate
+        for base in [root, root / "remotion"]
+        for candidate in [
+            base / "node_modules" / ".bin" / "remotion.cmd",
+            base / "node_modules" / ".bin" / "remotion",
+            base / "node_modules" / "remotion" / "package.json",
+        ]
     ]
     local_remotion = next((str(path.resolve()) for path in local_remotion_candidates if path.exists()), None)
     modules = {name: module_available(name) for name in ["faster_whisper", "whisper", "whisperx", "PIL"]}
@@ -301,11 +325,16 @@ def command_doctor(args: argparse.Namespace) -> None:
         fallbacks.append("Use supplied screenshots/recordings or extracted source frames instead of live browser capture.")
     if disk_free_gib < 10:
         fallbacks.append("Free space is limited: proxy first, reuse caches, estimate peak render storage, and render in validated chunks.")
+    system = platform.system()
+    warnings: list[str] = []
+    python_alias = shutil.which("python")
+    if system == "Windows" and python_alias and "windowsapps" in python_alias.lower():
+        warnings.append("The 'python' command resolves through WindowsApps and may be a Microsoft Store alias. Use the verified sys.executable path shown in this report.")
     report = {
         "selfContainedAgentSkill": True,
         "requiredAgentSkills": [],
         "projectRoot": str(root),
-        "platform": {"system": platform.system(), "release": platform.release(), "machine": platform.machine()},
+        "platform": {"system": system, "release": platform.release(), "machine": platform.machine()},
         "python": sys.executable,
         "executables": executables,
         "pythonModules": modules,
@@ -320,6 +349,8 @@ def command_doctor(args: argparse.Namespace) -> None:
             "remotionScaffoldPossible": has_node,
             "remotionRuntimePresent": bool(has_node and local_remotion),
         },
+        "bootstrapHints": bootstrap_hints(system),
+        "warnings": warnings,
         "fallbacks": fallbacks,
     }
     if args.write:
@@ -351,6 +382,13 @@ def command_doctor(args: argparse.Namespace) -> None:
     print("Features:")
     for name, available in report["features"].items():
         print(f"  - {name}: {'ready' if available else 'unavailable'}")
+    if warnings:
+        print("Warnings:")
+        for item in warnings:
+            print(f"  - {item}")
+    print("Authorized bootstrap hints (review before running):")
+    for name, command in report["bootstrapHints"].items():
+        print(f"  - {name}: {command}")
     if fallbacks:
         print("Fallback plan:")
         for item in fallbacks:
@@ -386,11 +424,16 @@ def command_advance(args: argparse.Namespace) -> None:
     if args.note:
         data["decisions"].append({"at": timestamp, "stage": current, "note": args.note})
     next_stage = STAGES[index + 1]
+    next_actions = (
+        [GATES[next_stage], "Use register for supplemental finals, captions, source projects, license evidence, or QA reports."]
+        if next_stage == "delivered"
+        else [GATES[next_stage], "Register gate evidence, then advance one stage."]
+    )
     data["workflow"].update({
         "stage": next_stage,
         "stageIndex": index + 1,
         "gate": GATES[next_stage],
-        "nextActions": [GATES[next_stage], "Register gate evidence, then advance one stage."],
+        "nextActions": next_actions,
     })
     data["workflow"]["history"].append({
         "at": timestamp,
@@ -401,6 +444,37 @@ def command_advance(args: argparse.Namespace) -> None:
         "note": args.note or "",
     })
     save(root, data)
+    print_summary(data)
+
+
+def command_register(args: argparse.Namespace) -> None:
+    root = Path(args.project_root).expanduser().resolve()
+    data = load(root)
+    timestamp = now()
+    artifacts: list[str] = []
+    missing: list[str] = []
+    for raw in args.artifact:
+        candidate = Path(raw).expanduser()
+        if not candidate.is_absolute():
+            candidate = root / candidate
+        if not candidate.exists():
+            missing.append(str(candidate))
+        artifacts.append(rel_or_abs(str(candidate), root))
+    if missing:
+        raise SystemExit("Artifact does not exist:\n" + "\n".join(missing))
+    stage = data["workflow"]["stage"]
+    for path in artifacts:
+        item = {"stage": stage, "path": path, "registeredAt": timestamp}
+        if args.role:
+            item["role"] = args.role
+        data["artifacts"].append(item)
+    if args.note:
+        data["decisions"].append({"at": timestamp, "stage": stage, "note": args.note})
+    data["workflow"]["history"].append(
+        {"at": timestamp, "event": "artifacts-registered", "stage": stage, "artifacts": artifacts, "role": args.role or "", "note": args.note or ""}
+    )
+    save(root, data)
+    print(f"Registered {len(artifacts)} artifact(s) without changing stage.")
     print_summary(data)
 
 
@@ -464,6 +538,13 @@ def build_parser() -> argparse.ArgumentParser:
     advance.add_argument("--artifact", action="append", required=True)
     advance.add_argument("--note")
     advance.set_defaults(func=command_advance)
+
+    register = commands.add_parser("register", help="Register existing artifacts without advancing the workflow")
+    register.add_argument("--project-root", required=True)
+    register.add_argument("--artifact", action="append", required=True)
+    register.add_argument("--role", help="Artifact role such as final, captions, source-composition, or QA")
+    register.add_argument("--note")
+    register.set_defaults(func=command_register)
 
     block = commands.add_parser("block", help="Record a user or external blocker")
     block.add_argument("--project-root", required=True)

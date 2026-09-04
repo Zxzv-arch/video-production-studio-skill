@@ -26,7 +26,7 @@ Examples:
 - Premount media-bearing sequences when the framework supports it.
 - Reference local assets through the project asset mechanism instead of absolute development-machine paths.
 
-For a new blank project, use `npx create-video@latest --yes --blank --no-tailwind <project-name>` and install dependencies. Add version-matched Remotion packages with `npx remotion add <package>` rather than manually mixing versions.
+For a new blank project, use `npx create-video@latest --yes --blank --no-tailwind <project-name>` when its prerequisites and repository constraints are suitable. If scaffolding or Git integration is unavailable, use `python scripts/bootstrap_remotion_project.py <project-directory>` to write a pinned minimal project without Git. Add version-matched Remotion packages with `npx remotion add <package>` rather than manually mixing versions.
 
 Put media in `public/` and resolve it with `staticFile()`. Import `<Video>` and `<Audio>` from `@remotion/media`. Use `<CanvasImage>` for still images when appropriate. Use `from`, `durationInFrames`, `trimBefore`, and `trimAfter` in frames; wrap components in `<Sequence>` when they do not expose the required timing props.
 
@@ -82,18 +82,34 @@ type Caption = {
 
 Use `@remotion/captions` to parse SRT or group word captions into readable pages. Load caption JSON or SRT with `staticFile()` and hold rendering with `useDelayRender()` until parsing completes. Convert page milliseconds to frames with the composition FPS, render each page in a `<Sequence>`, preserve intentional whitespace, and compute the active word from absolute caption time. Keep caption rendering in its own component above the visual content.
 
+After dialogue edits are locked, generate the caption data from source words plus the EDL:
+
+```text
+python scripts/retime_captions.py <words.json> <edit-manifest.json> <captions.karaoke.json> --fps <composition-fps>
+```
+
+Use its output-timeline milliseconds and frames directly. Do not subtract removed durations again inside React. Align scene boundaries with the same `round(milliseconds × fps / 1000)` convention. Applied display corrections retain source word indexes and must remain in the delivery disclosure chain.
+
 ## Audio and embedded video
 
 Layer audio with explicit `<Audio>` nodes. Delay with `<Sequence>`, trim in frames, and use a frame-relative `volume` callback for fades or ducking. Use `playbackRate` only within the media component's supported range. Pitch processing may differ between Studio preview and server render, so verify the rendered output when pitch is changed.
 
 For embedded footage, set sizing and `objectFit` deliberately. Use proxies when the browser cannot decode the camera codec reliably; keep source in/out decisions in the edit manifest so the final can return to original-quality media.
 
+For HEVC, 10-bit, HDR, variable-frame-rate, or camera formats that preview unreliably, choose the intermediate deliberately:
+
+- Use a CFR H.264/AAC mezzanine for SDR browser compatibility when one high-quality extra generation is acceptable. A slow `libx264` encode around CRF 14–18 is a practical starting range, not a lossless guarantee; preserve resolution, timing, and intended color conversion explicitly.
+- Do not collapse HDR or critical 10-bit material to ordinary 8-bit H.264 without an approved tone-map or quality tradeoff. Prefer a compatible 10-bit or intraframe mezzanine, or return to the source for finishing.
+- A final may derive from the H.264 mezzanine only when original decoding is unreliable, the mezzanine was created once at high quality, color was verified, and the quality cost is recorded. Avoid proxy-of-proxy generations.
+
 ## Rendering workflow
 
-1. Confirm media compatibility; create H.264 proxies when browser decoding cannot handle the camera codec.
-2. Render representative stills from every scene.
-3. Render a low-resolution complete preview to inspect transitions and audio sync.
-4. Correct warnings before the master render.
-5. Render the master once, then derive delivery variants without unnecessary repeated compositing.
+1. Confirm media compatibility; create an appropriate proxy or mezzanine when browser decoding cannot handle the camera codec.
+2. Run `npx remotion browser ensure` before the first unattended render. It verifies a usable browser and may download Chrome Headless Shell; record this network/storage side effect and use `--browser-executable` when an approved existing browser is required.
+3. Render representative stills at the title state, the middle of every scene, aggressive crops/punch-ins, caption extremes, and every return to a talking head.
+4. Render a low-resolution complete preview to inspect transitions and audio sync.
+5. Correct warnings before the master render.
+6. Render the master once, then derive delivery variants without unnecessary repeated compositing.
+7. Probe pixel format and color range/space/transfer/primaries, and compare representative pixels against the approved preview. Chromium/Remotion does not guarantee one universal tag combination. Remux or retag only when the pixels are already correct and the existing metadata is demonstrably wrong; otherwise perform an explicit color conversion.
 
 Use `npx remotion studio --no-open` for interactive preview, `npx remotion still <composition-id> --frame <n>` for representative frame checks, and `npx remotion render <composition-id> <output>` for requested output. Rendering authorization follows the user's requested deliverable; opening Studio alone is not proof that the composition renders.
