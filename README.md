@@ -22,6 +22,15 @@ python scripts/video_project.py status --project-root C:\path\to\my-video-projec
 
 The interface creates a portable `project.json`, production folders, stage gates, artifact history, blockers, and concrete next actions. It does not copy or upload the source footage.
 
+Projects start in a low-cost `draft` render mode. Promote only when the work is ready:
+
+```powershell
+python scripts/video_project.py render-mode --project-root C:\path\to\my-video-project --set review --note "Complete sequence ready"
+python scripts/video_project.py render-mode --project-root C:\path\to\my-video-project --set master --note "Timing and motion approved"
+```
+
+`draft` favors stills, short ranges, proxies, and low-resolution previews; `review` validates the complete sequence economically; `master` performs requested-resolution rendering, final finishing, full decode, and delivery QA. This prevents disposable iterations from paying final-export costs.
+
 Check executable capabilities without triggering dependency reminders:
 
 ```powershell
@@ -50,7 +59,7 @@ Copy or clone the **entire repository folder**, not only `SKILL.md`. The entry f
 | Path | Role |
 | --- | --- |
 | `SKILL.md` | Required portable Agent Skill entry point. |
-| `references/` | Editing, karaoke captions, energetic short-form, B-roll, Remotion, music/audio, and delivery guidance loaded on demand. |
+| `references/` | Editing, karaoke captions, energetic short-form, B-roll, Remotion, render-budget, music/audio, and delivery guidance loaded on demand. |
 | `scripts/` | Optional but recommended guided project interface and environment checks. |
 | `agents/openai.yaml` | Optional OpenAI/Codex UI metadata. Other compatible agents can safely ignore it. |
 

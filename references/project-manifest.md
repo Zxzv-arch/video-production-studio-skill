@@ -18,6 +18,12 @@ Prefer creating and updating the manifest through `scripts/video_project.py` for
     "aspectRatios": ["16:9", "9:16"],
     "offlineOnly": true
   },
+  "renderPlan": {
+    "activeMode": "draft",
+    "selectedAt": "2026-01-01T00:00:00+00:00",
+    "reason": "Low-cost iteration until timing and motion are approved",
+    "benchmarks": []
+  },
   "chapters": [
     {"id": "hook", "startMs": 0, "endMs": 4200, "purpose": "promise the outcome"}
   ],
@@ -80,6 +86,7 @@ Prefer creating and updating the manifest through `scripts/video_project.py` for
 - Track generated assets with prompt, provider/model, license or usage constraints, and whether they depict a real event.
 - Track music, effects, stock, fonts, and generated media in `assets`; a local file without license provenance is not automatically cleared for publication.
 - Update deliverable status only after the corresponding artifact exists and passes validation.
+- Treat `renderPlan.activeMode` as the current cost and validation budget, not as proof of quality. Preserve mode changes in workflow history, store representative timing measurements in `renderPlan.benchmarks`, and use `master` only for final candidates or fidelity-dependent tests.
 
 `scripts/build_edit_manifest.py` produces a deterministic starting manifest from SRT. Enrich it rather than treating its automatic chapters as final editorial structure.
 

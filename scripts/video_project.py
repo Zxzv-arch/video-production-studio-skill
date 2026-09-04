@@ -49,6 +49,12 @@ GATES = {
     "delivered": "Keep verified deliverables, editable source, and handoff notes together.",
 }
 
+RENDER_MODES = {
+    "draft": "fast iteration with stills, short ranges, proxies, or low-resolution previews",
+    "review": "complete-sequence review at economical fidelity with representative QA",
+    "master": "requested-fidelity final candidate with finishing and full delivery QA",
+}
+
 PROJECT_DIRS = [
     "analysis",
     "transcripts",
@@ -124,6 +130,7 @@ def command_init(args: argparse.Namespace) -> None:
     language = args.caption_language
     timeline = args.timeline
     style = args.style
+    render_mode = args.render_mode
     if interactive:
         name = prompt("Project name", name)
         kind = prompt("Kind (interview/podcast/tutorial/explainer/social)", kind)
@@ -132,6 +139,9 @@ def command_init(args: argparse.Namespace) -> None:
         language = prompt("Caption language", language)
         timeline = prompt("Timeline (programmatic/nle/both)", timeline)
         style = prompt("Visual style", style)
+        render_mode = prompt("Render mode (draft/review/master)", render_mode).lower()
+        if render_mode not in RENDER_MODES:
+            raise SystemExit(f"Render mode must be one of: {', '.join(RENDER_MODES)}")
 
     root.mkdir(parents=True, exist_ok=True)
     for directory in PROJECT_DIRS:
@@ -170,6 +180,12 @@ def command_init(args: argparse.Namespace) -> None:
             "allowUploads": False,
             "allowPaidServices": False,
             "notes": args.constraint,
+        },
+        "renderPlan": {
+            "activeMode": render_mode,
+            "selectedAt": created,
+            "reason": "Initial project render budget",
+            "benchmarks": [],
         },
         "workflow": {
             "stage": "inventory",
@@ -215,6 +231,9 @@ def print_summary(data: dict[str, Any]) -> None:
     print(f"\n{data['project']['name']}")
     print(f"{progress_bar(index)} {index}/{len(STAGES) - 1}  {stage}")
     print(f"Gate: {GATES[stage]}")
+    render_plan = data.get("renderPlan")
+    render_mode = render_plan.get("activeMode", "draft") if isinstance(render_plan, dict) else "draft"
+    print(f"Render mode: {render_mode} — {RENDER_MODES.get(render_mode, 'custom or unknown render budget')}")
     print(f"Sources: {len(data.get('sources', []))} | Artifacts: {len(data.get('artifacts', []))} | Open blockers: {len(open_blockers(data))}")
     actions = workflow.get("nextActions", [])
     if actions:
@@ -229,6 +248,38 @@ def print_summary(data: dict[str, Any]) -> None:
 
 def command_status(args: argparse.Namespace) -> None:
     print_summary(load(Path(args.project_root).expanduser().resolve()))
+
+
+def command_render_mode(args: argparse.Namespace) -> None:
+    root = Path(args.project_root).expanduser().resolve()
+    data = load(root)
+    timestamp = now()
+    render_plan = data.get("renderPlan")
+    if not isinstance(render_plan, dict):
+        render_plan = {"benchmarks": []}
+        data["renderPlan"] = render_plan
+    previous = render_plan.get("activeMode", "draft")
+    render_plan.update({
+        "activeMode": args.set,
+        "selectedAt": timestamp,
+        "reason": args.note or f"Changed render budget from {previous} to {args.set}",
+    })
+    render_plan.setdefault("benchmarks", [])
+    data["workflow"].setdefault("history", []).append({
+        "at": timestamp,
+        "event": "render-mode-changed",
+        "from": previous,
+        "to": args.set,
+        "note": args.note or "",
+    })
+    if args.note:
+        data.setdefault("decisions", []).append({
+            "at": timestamp,
+            "stage": data["workflow"]["stage"],
+            "note": f"Render mode {previous} -> {args.set}: {args.note}",
+        })
+    save(root, data)
+    print_summary(data)
 
 
 def resolve_executable(name: str, root: Path) -> str | None:
@@ -522,6 +573,7 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--caption-language", default="auto")
     init.add_argument("--timeline", choices=["programmatic", "nle", "both"], default="both")
     init.add_argument("--style", default="content-driven, polished, restrained")
+    init.add_argument("--render-mode", choices=sorted(RENDER_MODES), default="draft")
     init.add_argument("--must-keep", action="append", default=[])
     init.add_argument("--constraint", action="append", default=[])
     init.add_argument("--offline-only", action=argparse.BooleanOptionalAction, default=True)
@@ -532,6 +584,12 @@ def build_parser() -> argparse.ArgumentParser:
     status = commands.add_parser("status", help="Show progress, gate, blockers, and next actions")
     status.add_argument("--project-root", required=True)
     status.set_defaults(func=command_status)
+
+    render_mode = commands.add_parser("render-mode", help="Change the active draft, review, or master render budget")
+    render_mode.add_argument("--project-root", required=True)
+    render_mode.add_argument("--set", choices=sorted(RENDER_MODES), required=True)
+    render_mode.add_argument("--note", help="Reason for changing the render budget")
+    render_mode.set_defaults(func=command_render_mode)
 
     advance = commands.add_parser("advance", help="Register gate evidence and advance exactly one stage")
     advance.add_argument("--project-root", required=True)

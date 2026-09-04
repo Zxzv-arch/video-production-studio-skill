@@ -8,5 +8,6 @@
   "captionLanguage": "zh",
   "timelinePreference": "both",
   "visualStyle": "content-driven kinetic typography and restrained cinematic motion",
+  "renderMode": "draft",
   "offlineOnly": true
 }

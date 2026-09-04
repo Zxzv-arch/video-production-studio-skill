@@ -35,6 +35,7 @@ For any request that combines two or more production disciplines, spans multiple
 - Work locally by default. Do not upload footage, create accounts, spend credits, publish, or install a cloud service unless the user authorizes that action.
 - Inspect duration, streams, frame rate, dimensions, rotation, color tags, and audio before designing the edit.
 - Cache transcripts and derived media. Reuse them while the source hash and transcription settings are unchanged.
+- Select a render mode before generating media. Default to `draft` while timing or motion is changing, promote to `review` for full-sequence approval, and use `master` only for an explicit final candidate or when full fidelity is required to judge the work.
 - Never cut through a word. Pad ASR boundaries by 30–120 ms when accuracy is uncertain, and add short audio fades at every edit boundary.
 - Keep dialogue intelligible above music and effects. Apply captions after visual overlays.
 - Verify the final file by full decode plus visual samples. For substantial edits, watch or inspect the complete result at normal speed before declaring completion.
@@ -55,19 +56,20 @@ Choose only the references needed for the current job:
 - Missing or uncertain software, GPU, fonts, browser, NLE, ASR, network, or disk capacity: read [references/environment-fallbacks.md](references/environment-fallbacks.md).
 - Complex projects combining several modes: read [references/complex-workflows.md](references/complex-workflows.md) and maintain the manifest described in [references/project-manifest.md](references/project-manifest.md).
 - Cross-agent handoff, first-time setup, resumable work, or step-by-step guidance: read [references/guided-workflow.md](references/guided-workflow.md).
+- Render cost, preview fidelity, caching, Remotion concurrency, or deciding between draft/review/master: read [references/render-modes.md](references/render-modes.md).
 - Color, sound, subtitles, codecs, delivery, and quality control: read [references/finishing-and-qa.md](references/finishing-and-qa.md).
 - Music selection, licensing records, cue maps, dialogue ducking, or sound-effect design: read [references/music-and-sound.md](references/music-and-sound.md).
 
 ## Default execution shape
 
-1. Initialize or resume the guided project. Inventory source material and constraints: audience, destination, aspect ratios, target duration, must-keep moments, privacy, login/network limits, and delivery format. Infer low-risk defaults instead of blocking.
+1. Initialize or resume the guided project. Inventory source material and constraints: audience, destination, aspect ratios, target duration, must-keep moments, privacy, login/network limits, and delivery format. Select and record the current render mode; use `draft` when approval state is unknown. Infer low-risk defaults instead of blocking.
 2. Transcribe speech with word timestamps when dialogue drives the cut. Use `scripts/transcribe_local.py` when Faster Whisper is available.
 3. Build a semantic outline: hook, setup, development, proof, payoff, and call to action. Map each spoken claim to one visual purpose.
 4. Create an edit manifest before heavy rendering. Use `scripts/build_edit_manifest.py` to seed timings from SRT, then enrich it with editorial decisions.
 5. After edit timing is approved, generate output-timeline word captions with `scripts/retime_captions.py`; keep raw word timing immutable and corrections disclosed.
-6. Produce a low-resolution proxy or representative stills first. Correct timing, hierarchy, caption placement, and motion language before the expensive render.
-7. Render from original-quality media when possible. Avoid repeatedly encoding the same pixels.
-8. Finish audio and color, export the requested variants, and run `scripts/validate_delivery.py` on every final file.
+6. In `draft`, render representative stills or short ranges before a complete low-resolution preview. Correct timing, hierarchy, caption placement, and motion language before promotion.
+7. Promote to `review` for a complete sequence. Promote to `master` only after timing and motion are approved, unless full fidelity is necessary for an earlier color, codec, or effects decision. Render the master from original-quality media when possible and avoid repeatedly encoding the same pixels.
+8. Finish audio and color in `master`, export the requested variants, and run `scripts/validate_delivery.py` on every final file. Do not pay master-level finishing and full-decode costs for disposable drafts.
 9. Record validation reports, final paths, applied caption corrections, licensing notes, and unresolved uncertainties before advancing the workflow to `delivered`.
 
 ## Editorial decision rules
