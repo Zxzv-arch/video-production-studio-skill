@@ -53,6 +53,12 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
               | 'demo-detail'
               | 'speaker-return';
 
+            export type SlideCue = {
+              kind: 'statement' | 'steps' | 'comparison' | 'diagram';
+              title: string;
+              items: readonly string[];
+            };
+
             export type SceneCue = {
               id: string;
               from: number;
@@ -65,14 +71,16 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
               focusTarget?: {x: number; y: number; width: number; height: number};
               demoSteps?: readonly string[];
               resultLabel?: string;
+              slide: SlideCue;
             };
 
-            // Replace these example cues with transcript-linked output-timeline beats.
+            // Sentence-reactive mode: every transcript sentence gets dynamic type,
+            // a presenter/PiP state, and a content-specific animated slide or demo.
             export const sceneSchedule: readonly SceneCue[] = [
-              {id: 'hook', from: 0, durationInFrames: 90, mode: 'speaker-full', eyebrow: 'THE PROMISE', headline: 'Start with the person and the outcome', accentWords: ['outcome']},
-              {id: 'proof', from: 90, durationInFrames: 120, mode: 'demo-with-pip', eyebrow: 'REAL DEMO', headline: 'Watch the workflow happen live', accentWords: ['live'], callout: 'Speech drives every visible state', focusTarget: {x: 0.50, y: 0.48, width: 0.24, height: 0.18}, demoSteps: ['Open', 'Change', 'Confirm'], resultLabel: 'RESULT VERIFIED'},
-              {id: 'compare', from: 210, durationInFrames: 75, mode: 'split', eyebrow: 'WHY IT WORKS', headline: 'Keep the explanation beside the evidence', accentWords: ['evidence'], callout: 'One hero action per beat', focusTarget: {x: 0.12, y: 0.45, width: 0.44, height: 0.20}, demoSteps: ['Before', 'After'], resultLabel: 'CHANGE IS VISIBLE'},
-              {id: 'return', from: 285, durationInFrames: 75, mode: 'speaker-return', eyebrow: 'SYNTHESIS', headline: 'Return to the speaker for meaning and next steps', accentWords: ['meaning']},
+              {id: 'hook', from: 0, durationInFrames: 90, mode: 'speaker-support', eyebrow: 'SENTENCE 01', headline: 'Every sentence changes the visual state', accentWords: ['changes'], slide: {kind: 'statement', title: 'THE VISUAL PROMISE', items: ['SEE THE PERSON', 'SEE THE PROOF', 'UNDERSTAND WHY']}},
+              {id: 'proof', from: 90, durationInFrames: 120, mode: 'demo-with-pip', eyebrow: 'SENTENCE 02', headline: 'Watch the workflow happen live', accentWords: ['live'], callout: 'Speech drives every visible state', focusTarget: {x: 0.07, y: 0.49, width: 0.58, height: 0.14}, demoSteps: ['Open', 'Change', 'Confirm'], resultLabel: 'RESULT VERIFIED', slide: {kind: 'steps', title: 'LIVE IMPLEMENTATION', items: ['Open the target', 'Perform the action', 'Confirm the result']}},
+              {id: 'compare', from: 210, durationInFrames: 75, mode: 'split', eyebrow: 'SENTENCE 03', headline: 'Keep the explanation beside the evidence', accentWords: ['evidence'], callout: 'One hero action per beat', focusTarget: {x: 0.06, y: 0.36, width: 0.42, height: 0.24}, slide: {kind: 'comparison', title: 'EXPLANATION + EVIDENCE', items: ['What the speaker says', 'What the viewer can verify']}},
+              {id: 'return', from: 285, durationInFrames: 75, mode: 'speaker-support', eyebrow: 'SENTENCE 04', headline: 'Resolve with meaning and next steps', accentWords: ['meaning'], slide: {kind: 'diagram', title: 'THE RESOLUTION', items: ['Meaning', 'Decision', 'Next step']}},
             ];
             """
         ).lstrip(),
@@ -89,7 +97,7 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
               useCurrentFrame,
               useVideoConfig,
             } from 'remotion';
-            import {sceneSchedule, type StageMode} from './scene-schedule';
+            import {sceneSchedule, type SceneCue, type StageMode} from './scene-schedule';
 
             type Box = {left: number; top: number; width: number; height: number; radius: number};
             type TalkingHeadDemoProps = {speakerSrc?: string; demoSrc?: string};
@@ -138,6 +146,35 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
                 )}
               </AbsoluteFill>
             );
+
+            const AnimatedSlide: React.FC<{cue: SceneCue; globalFrame: number}> = ({cue, globalFrame}) => {
+              const localFrame = Math.max(0, globalFrame - cue.from);
+              const supportingSpeaker = cue.mode === 'speaker-support';
+              const split = cue.mode === 'split';
+              const panelLeft = supportingSpeaker ? '61%' : split ? '6%' : '6%';
+              const panelTop = supportingSpeaker ? '24%' : split ? '22%' : '25%';
+              const panelWidth = supportingSpeaker ? '34%' : split ? '88%' : '61%';
+              const columns = cue.slide.kind === 'comparison' ? 'repeat(2, minmax(0, 1fr))' : cue.slide.kind === 'statement' ? 'repeat(3, minmax(0, 1fr))' : '1fr';
+              return (
+                <div style={{position: 'absolute', left: panelLeft, top: panelTop, width: panelWidth, padding: split ? 24 : 34, borderRadius: 28, backgroundColor: 'rgba(7, 14, 30, 0.92)', border: '1px solid rgba(103,232,249,0.38)', boxShadow: '0 22px 70px rgba(0,0,0,0.36)', color: 'white', fontFamily: 'Arial, sans-serif', opacity: interpolate(localFrame, [8, 18], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}), translate: interpolate(localFrame, [8, 22], ['0px 24px', '0px 0px'], {easing: Easing.bezier(0.16, 1, 0.3, 1), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
+                  <div style={{fontSize: 15, fontWeight: 900, letterSpacing: 2.4, color: '#67e8f9'}}>{cue.slide.kind.toUpperCase()} / REMOTION</div>
+                  <div style={{marginTop: 10, fontSize: split ? 28 : 36, lineHeight: 1.05, fontWeight: 900}}>{cue.slide.title}</div>
+                  <div style={{display: 'grid', gridTemplateColumns: columns, gap: 12, marginTop: 24}}>
+                    {cue.slide.items.map((item, itemIndex) => {
+                      const start = 22 + itemIndex * 10;
+                      const active = interpolate(localFrame, [start, start + 8], [0, 1], {easing: Easing.bezier(0.16, 1, 0.3, 1), extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+                      return (
+                        <div key={item} style={{position: 'relative', minHeight: split ? 82 : 92, padding: '18px 18px 16px', borderRadius: 18, backgroundColor: `rgba(15, 31, 54, ${0.72 + active * 0.22})`, border: `2px solid rgba(103, 232, 249, ${0.16 + active * 0.72})`, opacity: 0.25 + active * 0.75, scale: 0.92 + active * 0.08}}>
+                          <div style={{fontSize: 14, fontWeight: 900, color: '#67e8f9'}}>0{itemIndex + 1}</div>
+                          <div style={{marginTop: 8, fontSize: split ? 19 : 22, lineHeight: 1.18, fontWeight: 800}}>{item}</div>
+                          <div style={{position: 'absolute', left: 0, bottom: 0, height: 4, width: `${active * 100}%`, borderRadius: 999, backgroundColor: itemIndex === cue.slide.items.length - 1 ? '#a3e635' : '#22d3ee'}} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            };
 
             const AnimatedHeadline: React.FC<{text: string; compact: boolean; accentWords?: readonly string[]}> = ({text, compact, accentWords}) => {
               const frame = useCurrentFrame();
@@ -251,7 +288,8 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
               return (
                 <AbsoluteFill style={{backgroundColor: '#060b18'}}>
                   <div style={{position: 'absolute', left: mix(previousEvidence.left, currentEvidence.left, progress), top: mix(previousEvidence.top, currentEvidence.top, progress), width: mix(previousEvidence.width, currentEvidence.width, progress), height: mix(previousEvidence.height, currentEvidence.height, progress), borderRadius: mix(previousEvidence.radius, currentEvidence.radius, progress), overflow: 'hidden', opacity: mix(previousEvidenceVisible, currentEvidenceVisible, progress), boxShadow: '0 24px 80px rgba(0,0,0,0.45)', zIndex: 1}}>
-                    <Surface src={demoSrc} label="DEMONSTRATION / EVIDENCE" muted />
+                    <Surface src={demoSrc} label="" muted />
+                    <AnimatedSlide cue={cue} globalFrame={frame} />
                   </div>
 
                   {cue.focusTarget ? (

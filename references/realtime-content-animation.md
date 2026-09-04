@@ -22,6 +22,8 @@ Run three synchronized visual tracks from that event data:
 
 Captions are a fourth, global accessibility track. Do not turn every caption word into a second kinetic-title system.
 
+When the user explicitly requests visual treatment for every sentence, use `sentence-reactive-explainers.md`. That mode requires a dynamic-text event, a presenter/PiP state, and an animated presentation or demonstration for every complete sentence while still sequencing the three tracks by attention priority.
+
 ## Convert speech time to frames once
 
 Use the same output-timeline timestamps and rounding convention as captions:

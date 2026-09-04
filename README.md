@@ -4,6 +4,8 @@ Portable Agent Skill for complex, local-first video production. It combines tran
 
 Its primary presentation specialty is professional talking-head explanation: the speaker remains a visible source of trust while real screens, products, processes, diagrams, or results take over the main stage. The bundled choreography covers animated full-screen-to-PiP transfers, live proof steps, dynamic letters and keywords, result feedback, split views, detail zooms, and speaker returns driven by transcript meaning. A capability-routing pass actively considers the relevant Remotion surface—rather than reducing every project to generic cards and zooms—and selects richer techniques only when they improve comprehension or proof.
 
+An explicit sentence-reactive mode can assign every spoken sentence three synchronized tracks: dynamic type, a presenter/PiP layout state, and a content-specific Remotion animated presentation or demonstration. Consecutive sentences may progressively update one coherent visual scene instead of resetting the full layout each time.
+
 It is self-contained at the Agent Skill level: no additional video-editing or Remotion guidance skill is required. Runtime programs such as FFmpeg, Python transcription packages, Node.js, and Remotion are only needed when the selected production path uses them.
 
 Repository: `Zxzv-arch/video-production-studio-skill` (Public)

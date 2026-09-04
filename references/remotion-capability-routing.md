@@ -2,6 +2,8 @@
 
 Use this reference before implementing a substantial Remotion composition. Its purpose is to turn the editorial plan into the strongest appropriate set of Remotion capabilities, rather than defaulting to static cards, generic zooms, and ordinary subtitles.
 
+If the user explicitly requires every spoken sentence to receive dynamic typography, PiP, and an animated presentation/demo, also apply `sentence-reactive-explainers.md` and validate sentence coverage before rendering.
+
 Remotion is the deterministic composition and orchestration layer. It can coordinate edited media, a continuous presenter, evidence scenes, captions, audio, data, and reusable variants on one frame-accurate timeline. FFmpeg, an NLE, browser capture, or a specialist animation engine may prepare assets, but the final visual logic should remain explainable and reproducible.
 
 ## Run a capability design pass

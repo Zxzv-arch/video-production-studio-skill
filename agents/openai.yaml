@@ -2,6 +2,6 @@ interface:
   display_name: "Video Production Studio"
   short_description: "Speech-synced PiP, Remotion demos, motion, and delivery"
   brand_color: "#6D5DFB"
-  default_prompt: "Use $video-production-studio to create a professional talking-head explainer that fully applies appropriate Remotion capabilities, with speech-synchronized PiP, realtime demonstrations, kinetic typography, captions, sound design, editable scenes, and verified delivery."
+  default_prompt: "Use $video-production-studio to create a sentence-reactive talking-head explainer in which every spoken sentence drives dynamic typography, a presenter/PiP state, and a content-specific Remotion animated presentation or demonstration, with captions, sound design, editable scenes, and verified delivery."
 policy:
   allow_implicit_invocation: true
