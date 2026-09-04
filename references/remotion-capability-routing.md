@@ -34,7 +34,7 @@ Do not begin by choosing an effect. Begin with the information change. Select on
 | Geography | static or animated map, route, marker, region highlight, evidence label | a map when location is not part of the explanation |
 | Audio or speech analysis | waveform, spectrum, transcript emphasis, beat or phoneme-linked motion | audio-reactive decoration unrelated to the message |
 | Brand illustration | SVG, Canvas, Lottie, or deterministic shape animation | rasterizing editable vector work too early |
-| Spatial product or system | restrained Three.js/3D only when depth or assembly is the idea | adding 3D merely to look expensive |
+| Spatial product or system | restrained Three.js/3D only when depth or assembly is the idea; then use `threejs-and-cad.md` | adding 3D merely to look expensive |
 | Scene change | hard cut by default; a short transition or overlay when the semantic relationship benefits | a different transition for every scene |
 | Reusable versions | parameterized props, schema validation, calculated metadata, aspect-aware layout tokens | duplicating an entire composition for each copy or platform |
 | Human-editable delivery | named scene components, explicit hero layers, inline keyframes, Studio-interactive elements | hiding edit-critical layers and timings inside opaque generators |
@@ -75,6 +75,7 @@ Remotion should orchestrate the video, not monopolize every operation.
 - Use a **graphical NLE** when the requested deliverable depends on manual multitrack dragging, collaboration conventions, or a native project file.
 - Use **Manim or a mathematical plotting system** for dense symbolic derivations that would be harder to verify in general React markup.
 - Use **Blender or a dedicated 3D pipeline** for physically complex camera, lighting, simulation, or photoreal spatial work; render a controlled asset for Remotion to composite.
+- Use **Text-to-CAD** only as an optional upstream candidate-asset generator for genuinely mechanical or dimensioned subjects. Validate geometry and convert once to a render-friendly format; never treat generated CAD as automatically correct.
 - Use **SVG/Lottie or an illustration tool** for authored vector character or brand animation, then preserve deterministic timing in the final composition.
 - Use **browser capture** for real UI behavior when authentic interaction is stronger evidence than a reconstruction.
 

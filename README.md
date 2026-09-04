@@ -6,6 +6,8 @@ Its primary presentation specialty is professional talking-head explanation: the
 
 An explicit sentence-reactive mode can assign every spoken sentence three synchronized tracks: dynamic type, a presenter/PiP layout state, and a content-specific Remotion animated presentation or demonstration. Consecutive sentences may progressively update one coherent visual scene instead of resetting the full layout each time.
 
+For spatially meaningful sentences, an optional Three.js route adds deterministic orbit, exploded-view, assembly, cutaway, highlight, and flow scenes through `@remotion/three`. Text-to-CAD remains an optional upstream asset source with mandatory geometry review and an illustrative-only fallback; it is not a default runtime dependency.
+
 It is self-contained at the Agent Skill level: no additional video-editing or Remotion guidance skill is required. Runtime programs such as FFmpeg, Python transcription packages, Node.js, and Remotion are only needed when the selected production path uses them.
 
 Repository: `Zxzv-arch/video-production-studio-skill` (Public)
@@ -52,6 +54,9 @@ python scripts/bootstrap_remotion_project.py C:\path\to\my-video-project\remotio
 # Create the presenter + demonstration + animated PiP starter
 python scripts/bootstrap_remotion_project.py C:\path\to\my-video-project\remotion --template talking-head-demo
 
+# Create a focused frame-driven Three.js assembly + presenter PiP starter
+python scripts/bootstrap_remotion_project.py C:\path\to\my-video-project\remotion --template threejs-product-demo
+
 # Convert source word timestamps through the approved edit manifest
 python scripts/retime_captions.py words.json edit-manifest.json captions.karaoke.json --fps 30
 
@@ -60,6 +65,8 @@ python scripts/video_project.py register --project-root C:\path\to\my-video-proj
 ```
 
 The talking-head starter renders immediately with labeled placeholders. Add the presenter and demonstration files to `public/`, set `speakerSrc` and `demoSrc`, and replace the example scene schedule with transcript-linked cues and semantic motion events. Its sample proof beat demonstrates a continuous speaker-to-PiP move, a word/letter reveal, step progression, focus annotation, and confirmed result state.
+
+The Three.js starter is a focused spatial beat, not a replacement for the main talking-head timeline. It demonstrates deterministic exploded-to-assembled motion, lighting, animated type, a presenter PiP, progress states, and a verification result. Use it only when depth conveys meaning, then embed the scene into the sentence-reactive composition. A Text-to-CAD system may supply GLB/glTF assets upstream, but the agent must validate geometry and dimensions before presenting the result as factual.
 
 ## What to copy
 

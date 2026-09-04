@@ -51,6 +51,34 @@ class BootstrapRemotionProjectTests(unittest.TestCase):
             self.assertTrue((root / "src" / "Composition.tsx").is_file())
             self.assertFalse((root / "src" / "talk-demo").exists())
 
+    def test_threejs_product_template_is_frame_driven_and_version_pinned(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "remotion"
+            completed = subprocess.run(
+                [sys.executable, str(SCRIPT), str(root), "--template", "threejs-product-demo"],
+                check=True,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            report = json.loads(completed.stdout)
+            package = json.loads((root / "package.json").read_text(encoding="utf-8"))
+            root_source = (root / "src" / "Root.tsx").read_text(encoding="utf-8")
+            source = (root / "src" / "three-demo" / "ThreeProductDemo.tsx").read_text(encoding="utf-8")
+            self.assertEqual(report["template"], "threejs-product-demo")
+            self.assertEqual(package["dependencies"]["@remotion/three"], package["dependencies"]["remotion"])
+            self.assertFalse(any(str(version).startswith(("^", "~")) for version in package["dependencies"].values()))
+            self.assertIn("@react-three/fiber", package["dependencies"])
+            self.assertIn("three", package["dependencies"])
+            self.assertIn("@types/three", package["devDependencies"])
+            self.assertIn("durationInFrames={180}", root_source)
+            self.assertIn("<ThreeCanvas", source)
+            self.assertIn('<Sequence layout="none"', source)
+            self.assertIn("useCurrentFrame", source)
+            self.assertNotIn("useFrame(", source)
+            self.assertIn("PRESENTER / PiP", source)
+            self.assertIn("GEOMETRY VERIFIED", source)
+
     def test_cli_reports_unicode_project_path(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "视频项目"

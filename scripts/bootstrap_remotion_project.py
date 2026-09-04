@@ -22,6 +22,9 @@ DEFAULT_VERSIONS = {
     "react": "19.2.8",
     "react_types": "19.2.18",
     "react_dom_types": "19.2.7",
+    "react_three_fiber": "9.7.0",
+    "three": "0.185.1",
+    "three_types": "0.185.4",
     "typescript": "5.9.3",
 }
 
@@ -314,6 +317,199 @@ def talking_head_template_files(root: Path) -> dict[Path, str]:
     }
 
 
+def threejs_product_template_files(root: Path) -> dict[Path, str]:
+    return {
+        root / "src" / "Composition.tsx": dedent(
+            """
+            import React from 'react';
+            import {ThreeProductDemo} from './three-demo/ThreeProductDemo';
+
+            export const Main: React.FC = () => <ThreeProductDemo />;
+            """
+        ).lstrip(),
+        root / "src" / "three-demo" / "ThreeProductDemo.tsx": dedent(
+            """
+            import React from 'react';
+            import {ThreeCanvas} from '@remotion/three';
+            import {
+              AbsoluteFill,
+              Easing,
+              Sequence,
+              interpolate,
+              spring,
+              useCurrentFrame,
+              useVideoConfig,
+            } from 'remotion';
+
+            type ProductPartProps = {
+              index: number;
+              color: string;
+              assembledX: number;
+              explodedX: number;
+              shape: 'box' | 'cylinder';
+            };
+
+            const clamp = {
+              extrapolateLeft: 'clamp' as const,
+              extrapolateRight: 'clamp' as const,
+            };
+
+            const ProductPart: React.FC<ProductPartProps> = ({index, color, assembledX, explodedX, shape}) => {
+              const frame = useCurrentFrame();
+              const {fps} = useVideoConfig();
+              const progress = spring({
+                frame: frame - 20 - index * 10,
+                fps,
+                config: {damping: 18, stiffness: 150, mass: 0.9},
+                durationInFrames: 38,
+              });
+              const x = interpolate(progress, [0, 1], [explodedX, assembledX]);
+              const lift = Math.sin(Math.min(1, progress) * Math.PI) * (0.22 + index * 0.05);
+
+              return (
+                <mesh position={[x, lift, 0]} castShadow receiveShadow>
+                  {shape === 'cylinder' ? (
+                    <cylinderGeometry args={[0.78, 0.78, 0.38, 48]} />
+                  ) : (
+                    <boxGeometry args={[1.55, 1.35, 1.35]} />
+                  )}
+                  <meshStandardMaterial color={color} roughness={0.32} metalness={0.28} />
+                </mesh>
+              );
+            };
+
+            const ProductAssembly: React.FC = () => {
+              const frame = useCurrentFrame();
+              const turn = interpolate(frame, [0, 112], [-0.48, 0.62], {
+                easing: Easing.bezier(0.16, 1, 0.3, 1),
+                ...clamp,
+              });
+              const settle = interpolate(frame, [92, 118], [0.92, 1], {
+                easing: Easing.bezier(0.16, 1, 0.3, 1),
+                ...clamp,
+              });
+
+              return (
+                <group rotation={[0.18, turn, -0.04]} scale={settle}>
+                  <ProductPart index={0} shape="cylinder" color="#67e8f9" assembledX={-0.98} explodedX={-3.6} />
+                  <ProductPart index={1} shape="box" color="#6d5dfb" assembledX={0} explodedX={0} />
+                  <ProductPart index={2} shape="cylinder" color="#a3e635" assembledX={0.98} explodedX={3.6} />
+                  <mesh position={[0, -1.05, 0]} receiveShadow>
+                    <boxGeometry args={[4.35, 0.16, 2.1]} />
+                    <meshStandardMaterial color="#18243e" roughness={0.72} metalness={0.1} />
+                  </mesh>
+                </group>
+              );
+            };
+
+            const LetterCascade: React.FC<{text: string}> = ({text}) => {
+              const frame = useCurrentFrame();
+              return (
+                <div aria-label={text} style={{display: 'flex', flexWrap: 'nowrap', whiteSpace: 'pre', gap: 0}}>
+                  {Array.from(text).map((glyph, index) => {
+                    const start = index * 1.4;
+                    const reveal = interpolate(frame, [start, start + 10], [0, 1], {
+                      easing: Easing.bezier(0.16, 1, 0.3, 1),
+                      ...clamp,
+                    });
+                    return (
+                      <span
+                        aria-hidden
+                        key={`${glyph}-${index}`}
+                        style={{
+                          display: 'inline-block',
+                          whiteSpace: 'pre',
+                          opacity: reveal,
+                          color: index >= 10 ? '#67e8f9' : '#f8fafc',
+                          transform: `translateY(${(1 - reveal) * 28}px) scale(${0.82 + reveal * 0.18})`,
+                        }}
+                      >
+                        {glyph}
+                      </span>
+                    );
+                  })}
+                </div>
+              );
+            };
+
+            const StepRail: React.FC = () => {
+              const frame = useCurrentFrame();
+              const steps = ['EXPLODE', 'ASSEMBLE', 'VERIFY'] as const;
+              return (
+                <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+                  {steps.map((step, index) => {
+                    const start = 18 + index * 34;
+                    const active = interpolate(frame, [start, start + 12], [0, 1], clamp);
+                    return (
+                      <React.Fragment key={step}>
+                        {index > 0 ? (
+                          <div style={{width: 44, height: 3, borderRadius: 999, backgroundColor: '#334155'}}>
+                            <div style={{width: `${active * 100}%`, height: '100%', borderRadius: 999, backgroundColor: '#67e8f9'}} />
+                          </div>
+                        ) : null}
+                        <div style={{padding: '11px 16px', borderRadius: 999, border: `2px solid rgba(103,232,249,${0.18 + active * 0.82})`, backgroundColor: active > 0.96 ? '#164e63' : '#10182b', color: 'white', fontSize: 17, fontWeight: 900, letterSpacing: 1.4, opacity: 0.38 + active * 0.62}}>
+                          {step}
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              );
+            };
+
+            const PresenterPip: React.FC = () => {
+              const frame = useCurrentFrame();
+              const {fps} = useVideoConfig();
+              const enter = spring({frame: frame - 8, fps, config: {damping: 18, stiffness: 180}});
+              return (
+                <div style={{position: 'absolute', right: 72, top: 72, width: 350, height: 224, borderRadius: 30, overflow: 'hidden', border: '2px solid rgba(255,255,255,0.75)', background: 'linear-gradient(145deg, #1e293b, #0f172a)', boxShadow: '0 24px 70px rgba(0,0,0,0.46)', transform: `translateY(${(1 - enter) * -34}px) scale(${0.88 + enter * 0.12})`, opacity: enter}}>
+                  <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 24, fontWeight: 900, letterSpacing: 1.6}}>PRESENTER / PiP</AbsoluteFill>
+                  <div style={{position: 'absolute', left: 18, bottom: 16, padding: '7px 11px', borderRadius: 999, backgroundColor: '#67e8f9', color: '#07111e', fontSize: 14, fontWeight: 900}}>EXPLAINING THE WHY</div>
+                </div>
+              );
+            };
+
+            export const ThreeProductDemo: React.FC = () => {
+              const frame = useCurrentFrame();
+              const {width, height, durationInFrames} = useVideoConfig();
+              const verified = interpolate(frame, [105, 120], [0, 1], clamp);
+
+              return (
+                <AbsoluteFill style={{backgroundColor: '#060b18', color: 'white', fontFamily: 'Arial, sans-serif', overflow: 'hidden'}}>
+                  <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 45% 45%, rgba(30,64,175,0.28), transparent 48%), linear-gradient(135deg, #060b18, #0b1225 55%, #071523)'}} />
+
+                  <div style={{position: 'absolute', left: 70, top: 62, width: 1250, zIndex: 4}}>
+                    <div style={{fontSize: 18, fontWeight: 900, letterSpacing: 3.2, color: '#a3e635'}}>SPATIAL BEAT / REMOTION + THREE.JS</div>
+                    <div style={{marginTop: 14, fontSize: 58, lineHeight: 1.02, fontWeight: 950}}>
+                      <LetterCascade text="SEE HOW THE PARTS CONNECT" />
+                    </div>
+                    <div style={{marginTop: 22, fontSize: 23, lineHeight: 1.35, color: '#cbd5e1', maxWidth: 790}}>Use 3D only when depth, assembly, rotation, or structure is the proof.</div>
+                  </div>
+
+                  <div style={{position: 'absolute', left: 82, top: 310, width: 1230, height: 590, borderRadius: 42, overflow: 'hidden', border: '1px solid rgba(103,232,249,0.28)', backgroundColor: 'rgba(7,17,35,0.76)', boxShadow: '0 30px 100px rgba(0,0,0,0.5)'}}>
+                    <ThreeCanvas width={1230} height={590} camera={{position: [0, 2.1, 8.4], fov: 40}} shadows>
+                      <ambientLight intensity={1.25} />
+                      <directionalLight position={[4, 7, 6]} intensity={3.2} castShadow />
+                      <pointLight position={[-5, 2, 4]} intensity={25} color="#67e8f9" />
+                      <Sequence layout="none" from={0} durationInFrames={durationInFrames}>
+                        <ProductAssembly />
+                      </Sequence>
+                    </ThreeCanvas>
+                    <div style={{position: 'absolute', left: 30, top: 28, padding: '8px 12px', borderRadius: 999, backgroundColor: 'rgba(8,15,31,0.78)', color: '#94a3b8', fontSize: 15, fontWeight: 900, letterSpacing: 1.5}}>ILLUSTRATIVE 3D / FRAME-DRIVEN</div>
+                    <div style={{position: 'absolute', left: 34, bottom: 30}}><StepRail /></div>
+                    <div style={{position: 'absolute', right: 34, bottom: 28, padding: '12px 17px', borderRadius: 16, backgroundColor: '#a3e635', color: '#102006', fontSize: 18, fontWeight: 950, letterSpacing: 1.4, opacity: verified, transform: `scale(${0.78 + verified * 0.22})`}}>GEOMETRY VERIFIED</div>
+                  </div>
+
+                  <PresenterPip />
+                  <div style={{position: 'absolute', left: 0, bottom: 0, width: `${(frame / Math.max(1, durationInFrames - 1)) * 100}%`, height: 7, background: 'linear-gradient(90deg, #6d5dfb, #67e8f9, #a3e635)'}} />
+                </AbsoluteFill>
+              );
+            };
+            """
+        ).lstrip(),
+    }
+
+
 def files_for(root: Path, versions: dict[str, str], template: str) -> dict[Path, str]:
     package = {
         "name": safe_package_name(root.name),
@@ -338,7 +534,7 @@ def files_for(root: Path, versions: dict[str, str], template: str) -> dict[Path,
             "typescript": versions["typescript"],
         },
     }
-    duration = 360 if template == "talking-head-demo" else 150
+    duration = 360 if template == "talking-head-demo" else 180 if template == "threejs-product-demo" else 150
     generated = {
         root / "package.json": json.dumps(package, indent=2) + "\n",
         root / "tsconfig.json": json.dumps(
@@ -394,6 +590,17 @@ def files_for(root: Path, versions: dict[str, str], template: str) -> dict[Path,
     }
     if template == "talking-head-demo":
         generated.update(talking_head_template_files(root))
+    if template == "threejs-product-demo":
+        package["dependencies"].update(
+            {
+                "@remotion/three": versions["remotion"],
+                "@react-three/fiber": versions["react_three_fiber"],
+                "three": versions["three"],
+            }
+        )
+        package["devDependencies"]["@types/three"] = versions["three_types"]
+        generated[root / "package.json"] = json.dumps(package, indent=2) + "\n"
+        generated.update(threejs_product_template_files(root))
     return generated
 
 
@@ -401,7 +608,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("--remotion-version", default=DEFAULT_VERSIONS["remotion"])
-    parser.add_argument("--template", choices=["minimal", "talking-head-demo"], default="minimal")
+    parser.add_argument(
+        "--template",
+        choices=["minimal", "talking-head-demo", "threejs-product-demo"],
+        default="minimal",
+    )
     parser.add_argument("--force", action="store_true", help="Replace only generated files; never removes other files")
     args = parser.parse_args()
     versions = dict(DEFAULT_VERSIONS)

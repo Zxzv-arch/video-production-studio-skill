@@ -73,6 +73,7 @@ For a very short sentence, overlap supporting motions at lower amplitude rather 
 | Code/configuration | token or line emphasis | code diff, command assembly, output/result pane |
 | Example | example label or proper noun | concrete scenario card, object, screenshot, or short clip |
 | Timeline/history | date or milestone reveal | timeline travel to the relevant milestone |
+| Spatial structure or assembly | component name or action verb | focused Three.js orbit, explode, assemble, cutaway, or flow scene governed by `threejs-and-cad.md` |
 | Caveat/warning | restrained underline or color change | condition → risk → safe action diagram |
 | Synthesis/CTA | key conclusion assembles | relationship recap, checklist, or next-step path |
 
@@ -121,6 +122,8 @@ The project may satisfy every sentence without becoming visually exhausting:
 - keep at least one readable resolved state before moving on.
 
 “Every sentence changes” does not mean “every sentence resets the entire composition.” Consecutive sentences about one idea should progressively update one coherent scene.
+
+Three.js is never a per-sentence quota. Only spatial sentences use it; neighboring sentences should reuse the mounted model and update camera, emphasis, or assembly state instead of rebuilding the scene.
 
 ## QA
 
